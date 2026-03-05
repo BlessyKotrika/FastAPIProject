@@ -18,9 +18,10 @@ class MandiService:
                 "api-key": self.api_key,
                 "format": "json",
                 "limit": 50,
-                "filters[commodity]": crop,
-                "filters[district]": location
+                "filters[commodity]": crop
             }
+            if location:
+                params["filters[district]"] = location
             if state:
                 params["filters[state]"] = state
             
@@ -31,15 +32,25 @@ class MandiService:
                 
                 records = data.get("records", [])
                 if not records:
-                    # Try broader search (district + commodity) without state if district+state+commodity returns nothing
-                    if state:
-                        params.pop("filters[state]")
+                    # Case 1: District + State failed. Try State only (broader)
+                    if location and state:
+                        params.pop("filters[district]")
                         response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
                         records = response.json().get("records", [])
                     
+                    # Case 2: State failed or was never provided. Try District only (if not tried yet)
+                    if not records and location:
+                        # Reset to district only if we previously tried state only
+                        if state:
+                            params["filters[district]"] = location
+                            params.pop("filters[state]")
+                        response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
+                        records = response.json().get("records", [])
+
+                    # Case 3: Still nothing? Try just the Crop (broadest)
                     if not records:
-                        # Try even broader search (just commodity) if district returns nothing
-                        params.pop("filters[district]")
+                        if "filters[district]" in params: params.pop("filters[district]")
+                        if "filters[state]" in params: params.pop("filters[state]")
                         response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
                         records = response.json().get("records", [])
                 
@@ -65,17 +76,21 @@ class MandiService:
         return "Stable", "Rising (+2%)"
 
     def get_best_mandi(self, data, location: str, language: str = "hi"):
-        """Finds best mandi and translates output if needed."""
+        """Finds best mandi based on price and proximity to user location."""
         if not data:
             return "No data available", 0
         
-        # Ensure Modal_Price is numeric for comparison
-        best = max(data, key=lambda x: float(x.get('Modal_Price', 0)))
+        # 1. First, try to find an exact match for the user's district
+        district_matches = [r for r in data if r.get('District', '').lower() == location.lower()]
+        
+        # 2. If we have district matches, pick the one with the best price among them
+        if district_matches:
+            best = max(district_matches, key=lambda x: float(x.get('Modal_Price', 0)))
+        else:
+            # 3. Fallback: pick the best price across all available markets (likely in the same state)
+            best = max(data, key=lambda x: float(x.get('Modal_Price', 0)))
+            
         market = best.get('Market', 'Unknown')
         price = float(best.get('Modal_Price', 0))
         
-        if language != "en":
-            # In production, use Bedrock for high-quality translation
-            pass
-
         return market, price

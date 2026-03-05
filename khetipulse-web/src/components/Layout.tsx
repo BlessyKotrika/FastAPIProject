@@ -20,7 +20,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { label: t('nav.mandi'), icon: TrendingUp, path: '/mandi' },
     { label: t('nav.policies'), icon: BookOpen, path: '/policies' },
     { label: t('nav.advisor'), icon: MessageSquare, path: '/advisor' },
-    { label: t('nav.more'), icon: Menu, path: '/more' },
   ];
 
   useEffect(() => {
@@ -49,12 +48,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors">
+          <button 
+            onClick={() => alert(t('more.notifications') + ': ' + t('common.loading'))}
+            className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors"
+          >
             <Bell className="w-5 h-5" />
           </button>
-          <button className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors">
+          <Link 
+            href="/more"
+            className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors"
+          >
             <User className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
       </header>
 
