@@ -1,3 +1,74 @@
 
 # local secrets
 .env
+# -----------------------------
+# OS / editor junk
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# JetBrains / VSCode
+.idea/
+.vscode/
+*.iml
+
+# -----------------------------
+# Python / FastAPI
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.env.*
+.venv/
+venv/
+ENV/
+env/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Local DB / runtime files
+*.sqlite3
+*.db
+
+# -----------------------------
+# Node / Next.js frontend
+# -----------------------------
+khetipulse-web/node_modules/
+khetipulse-web/.next/
+khetipulse-web/out/
+khetipulse-web/.turbo/
+khetipulse-web/.env.local
+khetipulse-web/.env.development.local
+khetipulse-web/.env.test.local
+khetipulse-web/.env.production.local
+khetipulse-web/npm-debug.log*
+khetipulse-web/yarn-debug.log*
+khetipulse-web/yarn-error.log*
+khetipulse-web/pnpm-debug.log*
+
+# -----------------------------
+# AWS / SAM build artifacts
+# -----------------------------
+.aws-sam/
+.sam-cache/
+
+# -----------------------------
+# Optional: lock files (KEEP if you want reproducible builds)
+# -----------------------------
+# uv.lock
+# khetipulse-web/package-lock.json
