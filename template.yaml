@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: KhetiPulse AI Backend - AWS SAM Template
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        AWS_REGION_NAME: !Ref AWS::Region
+        DYNAMODB_TABLE_USERS: !Ref UsersTable
+        DYNAMODB_TABLE_ADVISORY: !Ref AdvisoryHistoryTable
+        S3_BUCKET_NAME: !Ref DataBucket
+        BEDROCK_KB_ID: "" # To be provided after KB creation
+
+Resources:
+  KhetiPulseApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: app.main.handler
+      Events:
+        ApiGatewayProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: any
+        Root:
+          Type: Api
+          Properties:
+            Path: /
+            Method: any
+      Policies:
+        - AmazonBedrockFullAccess
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+        - TranslateReadOnly
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Users
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  AdvisoryHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: AdvisoryHistory
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "khetipulse-data-${AWS::AccountId}-${AWS::Region}"
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

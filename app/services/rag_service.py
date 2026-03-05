@@ -1,0 +1,52 @@
+from app.services.bedrock_service import bedrock_service
+from app.utils.confidence import calculate_confidence
+from app.utils.safety import is_query_safe, get_safety_refusal
+
+class RAGService:
+    def answer_question(self, question: str, language: str, crop: str = None, location: str = None):
+        if not is_query_safe(question):
+            return {
+                "answer": get_safety_refusal(),
+                "confidence_score": 0.0,
+                "citations": []
+            }
+
+        # Step 1: Retrieve relevant chunks from Bedrock KB
+        query_context = f"Crop: {crop}, Location: {location}, Question: {question}"
+        retrieved_results = bedrock_service.retrieve_from_kb(query_context)
+        
+        if not retrieved_results:
+            return {
+                "answer": "Not confident. I couldn't find enough reliable information to answer your question. Please consult a local agricultural expert.",
+                "confidence_score": 0.3,
+                "citations": []
+            }
+
+        # Step 2: Build context for LLM
+        context_text = "\n".join([r['content']['text'] for r in retrieved_results])
+        citations = [r['location']['s3Location']['uri'] for r in retrieved_results if 'location' in r]
+
+        # Step 3: Invoke LLM
+        system_prompt = f"""You are KhetiPulse AI, a senior agricultural consultant.
+        Answer the farmer's question using the provided context.
+        Provide a 3-step checklist and Do/Don't list.
+        Language: {language}.
+        If the information is not in the context, say "Not confident. Please consult local KVK."
+        Return output as a JSON object with keys: "answer", "confidence_score", "checklist", "do", "dont".
+        """
+        
+        prompt = f"Context: {context_text}\n\nQuestion: {question}"
+        response_json = bedrock_service.invoke_claude(prompt, system_prompt)
+
+        # Step 4: Format Response
+        # LLM might return its own confidence, but we combine it with retrieval score
+        retrieval_score = retrieved_results[0].get('score', 0.5) if retrieved_results else 0.5
+        final_confidence = calculate_confidence(retrieval_score=retrieval_score)
+
+        return {
+            "answer": response_json.get("answer", response_json.get("text", "Not confident.")),
+            "confidence_score": response_json.get("confidence_score", final_confidence),
+            "citations": list(set(citations))
+        }
+
+rag_service = RAGService()

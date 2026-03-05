@@ -1,0 +1,9 @@
+fastapi
+mangum
+uvicorn
+pydantic
+pydantic-settings
+boto3
+httpx
+python-multipart
+python-dotenv
