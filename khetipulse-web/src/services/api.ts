@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAppStore } from '@/lib/store';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
@@ -6,6 +7,26 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add a request interceptor to include the auth token
+api.interceptors.request.use((config) => {
+  const token = useAppStore.getState().auth.token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const authService = {
+  loginWithGoogle: async (idToken: string) => {
+    const response = await api.post('/auth/google', { id_token: idToken });
+    return response.data;
+  },
+  getMe: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+};
 
 export const todayService = {
   getActions: async (data: {

@@ -3,6 +3,9 @@ import { persist } from 'zustand/middleware';
 
 interface UserProfile {
   user_id: string;
+  email?: string;
+  full_name?: string;
+  picture?: string;
   mobile_number: string;
   language: string;
   crop: string;
@@ -15,10 +18,18 @@ interface UserProfile {
   is_onboarded: boolean;
 }
 
+interface AuthState {
+  token: string | null;
+  isAuthenticated: boolean;
+}
+
 interface AppState {
   profile: UserProfile;
+  auth: AuthState;
   setProfile: (profile: Partial<UserProfile>) => void;
+  setAuth: (auth: Partial<AuthState>) => void;
   resetProfile: () => void;
+  logout: () => void;
 }
 
 const initialProfile: UserProfile = {
@@ -35,15 +46,26 @@ const initialProfile: UserProfile = {
   is_onboarded: false,
 };
 
+const initialAuth: AuthState = {
+  token: null,
+  isAuthenticated: false,
+};
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       profile: initialProfile,
+      auth: initialAuth,
       setProfile: (newProfile) =>
         set((state) => ({
           profile: { ...state.profile, ...newProfile },
         })),
+      setAuth: (newAuth) =>
+        set((state) => ({
+          auth: { ...state.auth, ...newAuth },
+        })),
       resetProfile: () => set({ profile: initialProfile }),
+      logout: () => set({ profile: initialProfile, auth: initialAuth }),
     }),
     {
       name: 'khetipulse-storage',

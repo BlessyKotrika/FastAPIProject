@@ -7,5 +7,9 @@ boto3
 httpx
 python-multipart
 python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+google-auth
+google-auth-oauthlib
 pytest
 pytest-asyncio

@@ -1,18 +1,20 @@
 "use client";
 import React, { useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/i18n';
 import { Tractor, MapPin, Languages, ChevronRight, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const steps = [
-  { id: 'lang', title: 'Select Language', icon: Languages },
-  { id: 'loc', title: 'Location', icon: MapPin },
-  { id: 'farm', title: 'Farm Details', icon: Tractor },
-];
-
 export default function Onboarding() {
   const { setProfile } = useAppStore();
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
+
+  const steps = [
+    { id: 'lang', title: t('onboarding.selectLang'), icon: Languages },
+    { id: 'loc', title: t('onboarding.location'), icon: MapPin },
+    { id: 'farm', title: t('onboarding.farmDetails'), icon: Tractor },
+  ];
   const [form, setForm] = useState({
     language: 'hi',
     state: '',
@@ -25,7 +27,14 @@ export default function Onboarding() {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      setProfile({ ...form, is_onboarded: true, user_id: 'user_' + Math.random().toString(36).substr(2, 9) });
+      setProfile({ 
+        ...form, 
+        district: form.district,
+        state: form.state,
+        location: form.district, // for backward compatibility in some components
+        is_onboarded: true, 
+        user_id: 'user_' + Math.random().toString(36).substr(2, 9) 
+      });
     }
   };
 
@@ -51,8 +60,8 @@ export default function Onboarding() {
       <div className="flex-1">
         {step === 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">Pick your language</h2>
-            <p className="text-slate-500 text-sm mb-8 font-medium">Choose a language you are most comfortable with.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">{t('onboarding.pickLang')}</h2>
+            <p className="text-slate-500 text-sm mb-8 font-medium">{t('onboarding.pickLangSub')}</p>
             <div className="grid grid-cols-1 gap-3">
               {[
                 { code: 'hi', name: 'हिन्दी', sub: 'Hindi' },
@@ -81,11 +90,11 @@ export default function Onboarding() {
 
         {step === 1 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">Where's your land?</h2>
-            <p className="text-slate-500 text-sm mb-8 font-medium">We'll use this for weather and mandi updates.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">{t('onboarding.landLocation')}</h2>
+            <p className="text-slate-500 text-sm mb-8 font-medium">{t('onboarding.landLocationSub')}</p>
             <div className="space-y-6">
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">State</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">{t('onboarding.state')}</label>
                 <input
                   type="text"
                   placeholder="e.g. Uttar Pradesh"
@@ -95,7 +104,7 @@ export default function Onboarding() {
                 />
               </div>
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">District / Mandi Location</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">{t('onboarding.district')}</label>
                 <input
                   type="text"
                   placeholder="e.g. Barabanki"
@@ -110,25 +119,25 @@ export default function Onboarding() {
 
         {step === 2 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">Your main crop</h2>
-            <p className="text-slate-500 text-sm mb-8 font-medium">This helps us customize your advisor experience.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2 leading-tight">{t('onboarding.mainCrop')}</h2>
+            <p className="text-slate-500 text-sm mb-8 font-medium">{t('onboarding.mainCropSub')}</p>
             <div className="space-y-6">
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">Crop Name</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">{t('onboarding.cropName')}</label>
                 <select 
                   className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:outline-none focus:border-primary-300 focus:bg-white transition-all appearance-none font-semibold text-slate-800"
                   value={form.crop}
                   onChange={(e) => setForm({ ...form, crop: e.target.value })}
                 >
-                  <option value="">Select Crop</option>
-                  <option value="wheat">Wheat (गेहूं)</option>
-                  <option value="paddy">Paddy (धान)</option>
-                  <option value="cotton">Cotton (कपास)</option>
-                  <option value="maize">Maize (मक्का)</option>
+                  <option value="">{t('onboarding.selectCrop')}</option>
+                  <option value="wheat">{t('onboarding.crops.wheat')} (गेहूं)</option>
+                  <option value="paddy">{t('onboarding.crops.paddy')} (धान)</option>
+                  <option value="cotton">{t('onboarding.crops.cotton')} (कपास)</option>
+                  <option value="maize">{t('onboarding.crops.maize')} (मक्का)</option>
                 </select>
               </div>
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">Sowing Date</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest px-2">{t('onboarding.sowingDate')}</label>
                 <input
                   type="date"
                   className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:outline-none focus:border-primary-300 focus:bg-white transition-all font-semibold text-slate-800"
@@ -146,7 +155,7 @@ export default function Onboarding() {
         disabled={(step === 1 && (!form.state || !form.district)) || (step === 2 && !form.crop)}
         className="bg-primary-600 text-white w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95 mt-8 mb-4"
       >
-        {step === steps.length - 1 ? 'Start Farming' : 'Continue'}
+        {step === steps.length - 1 ? t('common.startFarming') : t('common.continue')}
         <ChevronRight size={24} className="stroke-[3px]" />
       </button>
     </div>

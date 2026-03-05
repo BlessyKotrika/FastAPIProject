@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/i18n';
 import { sellSmartService } from '@/services/api';
 import Layout from '@/components/Layout';
 import { TrendingUp, MapPin, Info, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
@@ -8,6 +9,7 @@ import { motion } from 'framer-motion';
 
 export default function MandiPage() {
   const { profile } = useAppStore();
+  const { t } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,9 +41,11 @@ export default function MandiPage() {
             <div className="bg-primary-600 p-2 rounded-xl text-white shadow-lg shadow-primary-100">
               <TrendingUp size={20} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 leading-tight">Mandi Insights</h2>
+            <h2 className="text-2xl font-bold text-slate-900 leading-tight">{t('mandi.title')}</h2>
           </div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">Live rates for {profile.crop}</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">
+            {t('mandi.liveRates', { crop: t(`onboarding.crops.${profile.crop}`) || profile.crop })}
+          </p>
         </section>
 
         {/* Price Card */}
@@ -54,32 +58,32 @@ export default function MandiPage() {
           
           <div className="flex justify-between items-start mb-8 relative z-10">
             <div>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Best Market</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">{t('mandi.bestMarket')}</p>
               <div className="flex items-center gap-2 text-slate-900">
                 <MapPin className="w-5 h-5 text-primary-600" />
-                <h3 className="text-2xl font-bold">{loading ? 'Searching...' : data?.best_mandi}</h3>
+                <h3 className="text-2xl font-bold">{loading ? t('mandi.searching') : data?.best_mandi}</h3>
               </div>
             </div>
             <div className="bg-primary-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-md">
-              {loading ? '...' : Math.round(data?.confidence_score * 100)}% Match
+              {loading ? '...' : Math.round(data?.confidence_score * 100)}% {t('mandi.match')}
             </div>
           </div>
 
           <div className="flex items-baseline gap-2 mb-8 relative z-10">
             <span className="text-5xl font-bold text-slate-900 tracking-tighter">₹{loading ? '---' : data?.net_price}</span>
-            <span className="text-slate-400 font-semibold text-sm uppercase tracking-widest">/ quintal</span>
+            <span className="text-slate-400 font-semibold text-sm uppercase tracking-widest">{t('mandi.perQuintal')}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-4 relative z-10">
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">7D Trend</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{t('mandi.trend7d')}</p>
               <div className="flex items-center gap-1 font-bold text-primary-600">
                 <ArrowUpRight className="w-4 h-4" />
                 {data?.trend_7d || 'Stable'}
               </div>
             </div>
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Forecast</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{t('mandi.forecast')}</p>
               <p className="font-bold text-slate-700">{data?.forecast_band || '---'}</p>
             </div>
           </div>
@@ -88,8 +92,8 @@ export default function MandiPage() {
         {/* Nearby Markets List */}
         <section className="space-y-4 px-1">
           <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest">Nearby Markets</h3>
-            <button className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">See All</button>
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest">{t('mandi.nearbyMarkets')}</h3>
+            <button className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">{t('mandi.seeAll')}</button>
           </div>
           {[
             { name: 'Lucknow Central', dist: '22 km', price: '₹2410' },
@@ -106,7 +110,7 @@ export default function MandiPage() {
                 </div>
                 <div>
                   <p className="font-bold text-slate-800 text-sm leading-tight">{m.name}</p>
-                  <p className="text-[10px] font-medium text-slate-400 mt-0.5">{m.dist} away</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-0.5">{m.dist} {t('mandi.away')}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -119,10 +123,10 @@ export default function MandiPage() {
         {/* Recommendation Tip */}
         <div className="bg-slate-900 rounded-[1.5rem] p-5 flex gap-4 shadow-xl shadow-slate-200">
           <div className="bg-white/10 p-3 rounded-xl shrink-0">
-            <Info className="w-6 h-6 text-primary-400" />
+            <info className="w-6 h-6 text-primary-400" />
           </div>
           <p className="text-xs font-medium text-slate-300 leading-relaxed">
-            Prices are rising in neighboring districts. Consider holding your {profile.crop} for 3 more days to maximize profit.
+            {t('mandi.tip', { crop: t(`onboarding.crops.${profile.crop}`) || profile.crop })}
           </p>
         </div>
       </div>

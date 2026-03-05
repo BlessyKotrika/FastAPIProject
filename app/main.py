@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-from app.routers import today, sell, chat, schemes, preferences
+from app.routers import today, sell, chat, schemes, preferences, auth
 from app.config import settings
 from app.utils.exceptions import KhetiPulseException
 
@@ -62,6 +62,7 @@ async def log_requests(request: Request, call_next):
     return response
 
 # Routers
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(preferences.router, prefix="/preferences", tags=["User Preferences"])
 app.include_router(today.router, prefix="/today", tags=["Today Actions"])
 app.include_router(sell.router, prefix="/sell-smart", tags=["Sell Smart"])

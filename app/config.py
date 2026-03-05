@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     # API Keys
     OPENWEATHER_API_KEY: str = ""
 
+    # JWT Settings
+    SECRET_KEY: str = "khetipulse-super-secret-key-replace-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+
+    # Google OAuth2 Settings
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 settings = Settings()

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/i18n';
 import { chatService } from '@/services/api';
 import Layout from '@/components/Layout';
 import { MessageSquare, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
@@ -13,8 +14,9 @@ interface Message {
 
 export default function AdvisorPage() {
   const { profile } = useAppStore();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', text: 'Namaste! I am your KhetiPulse AI advisor. How can I help you with your farm today?' }
+    { role: 'bot', text: t('advisor.welcome') }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,10 +44,10 @@ export default function AdvisorPage() {
       
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: res.answer || "I'm sorry, I couldn't process that. Please try again." 
+        text: res.answer || t('advisor.connectionError') 
       }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'bot', text: "Connection error. Please check your internet." }]);
+      setMessages(prev => [...prev, { role: 'bot', text: t('advisor.connectionError') }]);
     } finally {
       setLoading(false);
     }
@@ -61,11 +63,11 @@ export default function AdvisorPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-slate-900 leading-tight">Farm Advisor</h2>
+              <h2 className="font-bold text-slate-900 leading-tight">{t('advisor.title')}</h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                 <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">
-                  AI Online
+                  {t('advisor.aiOnline')}
                 </p>
               </div>
             </div>
@@ -91,7 +93,7 @@ export default function AdvisorPage() {
                     {msg.text}
                     {msg.role === 'bot' && (
                       <div className="mt-2 pt-2 border-t border-slate-50 flex justify-end">
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">KhetiPulse AI</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t('advisor.aiLabel')}</p>
                       </div>
                     )}
                   </div>
@@ -125,7 +127,7 @@ export default function AdvisorPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask anything about your farm..."
+              placeholder={t('advisor.placeholder')}
               className="flex-1 bg-transparent px-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none"
             />
             <button

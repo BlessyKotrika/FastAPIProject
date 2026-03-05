@@ -13,6 +13,11 @@ Thumbs.db
 *.iml
 
 # -----------------------------
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
 # Python / FastAPI
 # -----------------------------
 __pycache__/

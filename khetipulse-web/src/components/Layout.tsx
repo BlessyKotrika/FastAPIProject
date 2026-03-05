@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Home, TrendingUp, BookOpen, MessageSquare, Menu, User, Bell, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,17 +10,18 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const navItems = [
-  { label: 'Dashboard', icon: Home, path: '/' },
-  { label: 'Mandi', icon: TrendingUp, path: '/mandi' },
-  { label: 'Policies', icon: BookOpen, path: '/policies' },
-  { label: 'Advisor', icon: MessageSquare, path: '/advisor' },
-  { label: 'More', icon: Menu, path: '/more' },
-];
-
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
   const [isOffline, setIsOffline] = useState(false);
+
+  const navItems = [
+    { label: t('nav.dashboard'), icon: Home, path: '/' },
+    { label: t('nav.mandi'), icon: TrendingUp, path: '/mandi' },
+    { label: t('nav.policies'), icon: BookOpen, path: '/policies' },
+    { label: t('nav.advisor'), icon: MessageSquare, path: '/advisor' },
+    { label: t('nav.more'), icon: Menu, path: '/more' },
+  ];
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
@@ -43,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-slate-900 leading-none">KhetiPulse</h1>
-            <p className="text-[10px] font-semibold text-primary-600 uppercase tracking-widest">Smart Agriculture</p>
+            <p className="text-[10px] font-semibold text-primary-600 uppercase tracking-widest">{t('common.smartAgri')}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -59,7 +61,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Offline Banner */}
       {isOffline && (
         <div className="bg-amber-100 text-amber-800 text-[10px] py-1.5 px-4 text-center font-bold uppercase tracking-wider animate-pulse border-b border-amber-200">
-          Offline: Using local data
+          {t('common.offline')}
         </div>
       )}
 

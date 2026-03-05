@@ -49,9 +49,23 @@ The backend is a production-grade FastAPI application with structured logging an
     AWS_REGION=us-east-1
     BEDROCK_KB_ID=your_kb_id
     OPENWEATHER_API_KEY=your_weather_key
+    
+    # Google Auth (Get from Google Cloud Console)
+    GOOGLE_CLIENT_ID=your_google_client_id
+    GOOGLE_CLIENT_SECRET=your_google_client_secret
     ```
 
-5.  **Start the Backend Server**:
+5.  **Google Cloud Console Setup (Required for Login)**:
+    1.  Go to [Google Cloud Console](https://console.cloud.google.com/).
+    2.  Create a new project (e.g., `KhetiPulse`).
+    3.  Navigate to **APIs & Services > Credentials**.
+    4.  Click **Create Credentials > OAuth client ID**.
+    5.  Application type: `Web application`.
+    6.  Authorized JavaScript origins: `http://localhost:3000`.
+    7.  Authorized redirect URIs: `http://localhost:3000`.
+    8.  Copy the **Client ID** and **Client Secret** to your `.env` file.
+
+6.  **Start the Backend Server**:
     ```bash
     uvicorn app.main:app --reload --port 8000
     ```
@@ -79,6 +93,7 @@ The frontend is built with Next.js 14, Tailwind CSS, and Framer Motion.
     Ensure a `.env.local` file exists in the `khetipulse-web/` folder with the following:
     ```env
     NEXT_PUBLIC_API_URL=http://localhost:8000
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here
     ```
 
 5.  **Start the Development Server**:

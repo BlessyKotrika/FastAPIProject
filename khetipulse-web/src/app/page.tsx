@@ -1,22 +1,30 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/i18n';
 import { todayService } from '@/services/api';
 import Layout from '@/components/Layout';
 import Onboarding from '@/components/Onboarding';
+import { useRouter } from 'next/navigation';
 import { CloudRain, Wind, Thermometer, Tractor, Ban, Calendar, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
-  const { profile } = useAppStore();
+  const { profile, auth } = useAppStore();
+  const { t } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
+    if (!auth.isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (profile.is_onboarded) {
       fetchDashboard();
     }
-  }, [profile]);
+  }, [profile, auth, router]);
 
   const fetchDashboard = async () => {
     try {
@@ -46,11 +54,13 @@ export default function Dashboard() {
         {/* Welcome Card */}
         <section className="flex justify-between items-end px-1">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 leading-tight">Namaste!</h2>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{profile.crop} • {profile.location}</p>
+            <h2 className="text-2xl font-bold text-slate-900 leading-tight">{t('common.namaste')}</h2>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              {t(`onboarding.crops.${profile.crop}`) || profile.crop} • {profile.location}
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-primary-600 uppercase tracking-tighter">Farm Health</p>
+            <p className="text-[10px] font-bold text-primary-600 uppercase tracking-tighter">{t('dashboard.farmHealth')}</p>
             <div className="flex gap-1 mt-1">
               {[1, 2, 3, 4, 5].map(i => <div key={i} className={`w-3 h-1 rounded-full ${i <= 4 ? 'bg-primary-500' : 'bg-slate-200'}`}></div>)}
             </div>
@@ -68,7 +78,7 @@ export default function Dashboard() {
           
           <div className="flex justify-between items-start mb-6 relative z-10">
             <div>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Live Forecast</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{t('dashboard.liveForecast')}</p>
               <h3 className="text-4xl font-bold mt-1">28°<span className="text-xl opacity-50">C</span></h3>
               <p className="text-sm font-medium opacity-80 mt-1 text-primary-400">Mostly Sunny</p>
             </div>
@@ -80,17 +90,17 @@ export default function Dashboard() {
           <div className="grid grid-cols-3 gap-2 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/5 relative z-10">
             <div className="text-center">
               <div className="text-slate-400 mb-1 flex justify-center"><CloudRain size={16} /></div>
-              <p className="text-[10px] font-medium opacity-60 uppercase">Rain</p>
+              <p className="text-[10px] font-medium opacity-60 uppercase">{t('dashboard.rain')}</p>
               <p className="text-sm font-bold">40%</p>
             </div>
             <div className="text-center border-x border-white/5 px-2">
               <div className="text-slate-400 mb-1 flex justify-center"><Wind size={16} /></div>
-              <p className="text-[10px] font-medium opacity-60 uppercase">Wind</p>
+              <p className="text-[10px] font-medium opacity-60 uppercase">{t('dashboard.wind')}</p>
               <p className="text-sm font-bold">12<span className="text-[10px]">km/h</span></p>
             </div>
             <div className="text-center">
               <div className="text-slate-400 mb-1 flex justify-center"><Thermometer size={16} /></div>
-              <p className="text-[10px] font-medium opacity-60 uppercase">Humidity</p>
+              <p className="text-[10px] font-medium opacity-60 uppercase">{t('dashboard.humidity')}</p>
               <p className="text-sm font-bold">65%</p>
             </div>
           </div>
@@ -106,7 +116,7 @@ export default function Dashboard() {
             <div className="bg-emerald-50 w-10 h-10 rounded-xl flex items-center justify-center text-emerald-600 mb-3">
               <Tractor className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-800 text-xs mb-2 uppercase tracking-wide">Do Today</h3>
+            <h3 className="font-bold text-slate-800 text-xs mb-2 uppercase tracking-wide">{t('dashboard.doToday')}</h3>
             {loading ? (
               <div className="space-y-2">
                 <div className="h-2 bg-slate-50 rounded w-full animate-pulse"></div>
@@ -131,7 +141,7 @@ export default function Dashboard() {
             <div className="bg-rose-50 w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 mb-3">
               <Ban className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-800 text-xs mb-2 uppercase tracking-wide">Avoid</h3>
+            <h3 className="font-bold text-slate-800 text-xs mb-2 uppercase tracking-wide">{t('dashboard.avoidToday')}</h3>
             {loading ? (
               <div className="space-y-2">
                 <div className="h-2 bg-slate-50 rounded w-full animate-pulse"></div>
@@ -159,8 +169,8 @@ export default function Dashboard() {
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h4 className="font-bold text-sm tracking-tight">Next 48 Hours</h4>
-              <p className="text-[10px] opacity-80">Check spray windows</p>
+              <h4 className="font-bold text-sm tracking-tight">{t('dashboard.next48h')}</h4>
+              <p className="text-[10px] opacity-80">{t('dashboard.checkSpray')}</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 opacity-50" />

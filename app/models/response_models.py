@@ -25,3 +25,15 @@ class SchemeResponse(BaseModel):
     eligible_schemes: List[str] = Field(..., description="List of eligible government schemes")
     documents_required: List[str] = Field(..., description="Required documents for application")
     application_links: List[str] = Field(..., description="Links to apply for the schemes")
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str]
+    mobile_number: Optional[str]
+    picture: Optional[str] = None
