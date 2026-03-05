@@ -18,6 +18,14 @@ api.interceptors.request.use((config) => {
 });
 
 export const authService = {
+  login: async (data: any) => {
+    const response = await api.post('/auth/login', data);
+    return response.data;
+  },
+  register: async (data: any) => {
+    const response = await api.post('/auth/register', data);
+    return response.data;
+  },
   loginWithGoogle: async (idToken: string) => {
     const response = await api.post('/auth/google', { id_token: idToken });
     return response.data;

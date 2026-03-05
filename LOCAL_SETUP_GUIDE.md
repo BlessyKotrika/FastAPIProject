@@ -55,15 +55,18 @@ The backend is a production-grade FastAPI application with structured logging an
     GOOGLE_CLIENT_SECRET=your_google_client_secret
     ```
 
-5.  **Google Cloud Console Setup (Required for Login)**:
-    1.  Go to [Google Cloud Console](https://console.cloud.google.com/).
-    2.  Create a new project (e.g., `KhetiPulse`).
-    3.  Navigate to **APIs & Services > Credentials**.
-    4.  Click **Create Credentials > OAuth client ID**.
-    5.  Application type: `Web application`.
-    6.  Authorized JavaScript origins: `http://localhost:3000`.
-    7.  Authorized redirect URIs: `http://localhost:3000`.
-    8.  Copy the **Client ID** and **Client Secret** to your `.env` file.
+5.  **Authentication Setup**:
+    KhetiPulse supports both local ID/Password login and Google OAuth2.
+    - **Local Login**: No additional setup required! Just register a new account on the Login page.
+    - **Google OAuth2 (Optional)**:
+        1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+        2. Create a new project (e.g., `KhetiPulse`).
+        3. Navigate to **APIs & Services > Credentials**.
+        4. Click **Create Credentials > OAuth client ID**.
+        5. Application type: `Web application`.
+        6. Authorized JavaScript origins: `http://localhost:3000`.
+        7. Authorized redirect URIs: `http://localhost:3000`.
+        8. Copy the **Client ID** and **Client Secret** to your `.env` (Backend) and `khetipulse-web/.env.local` (Frontend) files.
 
 6.  **Start the Backend Server**:
     ```bash
@@ -116,6 +119,7 @@ chmod +x tests/test_endpoints.sh
 
 ### 2. Manual Verification
 *   Open your browser to [http://localhost:3000](http://localhost:3000).
+*   **Create an Account**: Since you don't have Google login, use the **Register** tab to create a local username and password.
 *   Complete the **Onboarding Wizard**.
 *   Verify that the **Dashboard** displays weather alerts and the **Mandi Insights** show real-time prices.
 *   Ask a question in the **AI Advisor** chat.

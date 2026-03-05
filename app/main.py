@@ -2,8 +2,9 @@ import logging
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from app.routers import today, sell, chat, schemes, preferences, auth
@@ -35,6 +36,24 @@ async def khetipulse_exception_handler(request: Request, exc: KhetiPulseExceptio
             "message": exc.message,
             "extra": exc.extra
         },
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Custom handler for Pydantic validation errors to return a string detail."""
+    errors = exc.errors()
+    # Format the first error into a readable string
+    if errors:
+        error = errors[0]
+        field = " -> ".join([str(l) for l in error.get("loc", []) if l != "body"])
+        msg = error.get("msg")
+        detail = f"Validation Error: {field} {msg}" if field else f"Validation Error: {msg}"
+    else:
+        detail = "Validation Error"
+        
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": detail},
     )
 
 @app.exception_handler(Exception)
