@@ -2,8 +2,8 @@ import httpx
 from app.config import settings
 
 class WeatherService:
-    def __init__(self):
-        self.api_key = settings.OPENWEATHER_API_KEY
+    def __init__(self, api_key: str = settings.OPENWEATHER_API_KEY):
+        self.api_key = api_key
         self.base_url = "https://api.openweathermap.org/data/2.5/forecast"
 
     async def get_forecast(self, location: str):
@@ -27,5 +27,3 @@ class WeatherService:
             response = await client.get(self.base_url, params=params)
             response.raise_for_status()
             return response.json()
-
-weather_service = WeatherService()

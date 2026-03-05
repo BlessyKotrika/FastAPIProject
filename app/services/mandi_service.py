@@ -5,9 +5,9 @@ import httpx
 from app.config import settings
 
 class MandiService:
-    def __init__(self):
-        self.s3 = boto3.client('s3', region_name=settings.AWS_REGION)
-        self.api_key = settings.AGMARKNET_API_KEY
+    def __init__(self, api_key: str = settings.AGMARKNET_API_KEY, region: str = settings.AWS_REGION):
+        self.s3 = boto3.client('s3', region_name=region)
+        self.api_key = api_key
         self.resource_id = settings.AGMARKNET_RESOURCE_ID
         self.base_url = "https://api.data.gov.in/resource/"
 
@@ -70,5 +70,3 @@ class MandiService:
             pass
 
         return market, price
-
-mandi_service = MandiService()

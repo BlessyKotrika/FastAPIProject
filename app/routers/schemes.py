@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models.request_models import SchemeRequest
 from app.models.response_models import SchemeResponse
-from app.services.rag_service import rag_service
+from app.services.rag_service import RAGService
+from app.dependencies import get_rag_service
 
 router = APIRouter()
 
 @router.post("/", response_model=SchemeResponse)
-async def get_schemes(request: SchemeRequest):
+async def get_schemes(request: SchemeRequest, rag_service: RAGService = Depends(get_rag_service)):
     try:
         # Use RAG to find schemes based on criteria
         query = f"Schemes for {request.category} farmers in {request.state} for {request.crop} with {request.land_size} hectares."
@@ -24,4 +25,6 @@ async def get_schemes(request: SchemeRequest):
             application_links=response.get("application_links", ["https://pmkisan.gov.in/"])
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))

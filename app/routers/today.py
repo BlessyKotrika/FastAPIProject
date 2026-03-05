@@ -1,13 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models.request_models import TodayRequest
 from app.models.response_models import TodayResponse
-from app.services.weather_service import weather_service
-from app.services.recommendation_engine import recommendation_engine
+from app.services.weather_service import WeatherService
+from app.services.recommendation_engine import RecommendationEngine
+from app.dependencies import get_weather_service, get_recommendation_engine
 
 router = APIRouter()
 
 @router.post("/", response_model=TodayResponse)
-async def get_today_actions(request: TodayRequest):
+async def get_today_actions(
+    request: TodayRequest,
+    weather_service: WeatherService = Depends(get_weather_service),
+    recommendation_engine: RecommendationEngine = Depends(get_recommendation_engine)
+):
     try:
         # Step 1: Fetch Weather
         weather_data = await weather_service.get_forecast(request.location)
@@ -26,4 +31,6 @@ async def get_today_actions(request: TodayRequest):
         
         return actions
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))

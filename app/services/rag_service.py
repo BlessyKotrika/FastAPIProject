@@ -1,8 +1,12 @@
-from app.services.bedrock_service import bedrock_service
+from app.services.bedrock_service import BedrockService
 from app.utils.confidence import calculate_confidence
 from app.utils.safety import is_query_safe, get_safety_refusal
+from app.utils.exceptions import ExternalServiceError
 
 class RAGService:
+    def __init__(self, bedrock_service: BedrockService):
+        self.bedrock_service = bedrock_service
+
     def answer_question(self, question: str, language: str, crop: str = None, location: str = None):
         if not is_query_safe(question):
             return {
@@ -13,7 +17,10 @@ class RAGService:
 
         # Step 1: Retrieve relevant chunks from Bedrock KB
         query_context = f"Crop: {crop}, Location: {location}, Question: {question}"
-        retrieved_results = bedrock_service.retrieve_from_kb(query_context)
+        try:
+            retrieved_results = self.bedrock_service.retrieve_from_kb(query_context)
+        except Exception as e:
+            raise ExternalServiceError("Bedrock KB", detail=str(e))
         
         if not retrieved_results:
             return {
@@ -36,7 +43,10 @@ class RAGService:
         """
         
         prompt = f"Context: {context_text}\n\nQuestion: {question}"
-        response_json = bedrock_service.invoke_claude(prompt, system_prompt)
+        try:
+            response_json = self.bedrock_service.invoke_claude(prompt, system_prompt)
+        except Exception as e:
+            raise ExternalServiceError("Bedrock LLM", detail=str(e))
 
         # Step 4: Format Response
         # LLM might return its own confidence, but we combine it with retrieval score
@@ -48,5 +58,3 @@ class RAGService:
             "confidence_score": response_json.get("confidence_score", final_confidence),
             "citations": list(set(citations))
         }
-
-rag_service = RAGService()

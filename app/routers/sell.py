@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models.request_models import SellSmartRequest
 from app.models.response_models import SellSmartResponse
-from app.services.mandi_service import mandi_service
+from app.services.mandi_service import MandiService
+from app.dependencies import get_mandi_service
 from app.utils.confidence import calculate_confidence
 
 router = APIRouter()
 
 @router.post("/", response_model=SellSmartResponse)
-async def sell_smart(request: SellSmartRequest):
+async def sell_smart(request: SellSmartRequest, mandi_service: MandiService = Depends(get_mandi_service)):
     try:
         # Step 1: Load Mandi Data
         data = await mandi_service.get_mandi_data(request.crop, request.location)
@@ -16,7 +17,7 @@ async def sell_smart(request: SellSmartRequest):
         best_market, price = mandi_service.get_best_mandi(data, request.location, request.language)
         
         # Step 3: Compute Trends
-        trend_7d, trend_30d = mandi_service.compute_trends(data)
+        trend_7d, _ = mandi_service.compute_trends(data)
         
         return SellSmartResponse(
             best_mandi=best_market,
@@ -26,4 +27,6 @@ async def sell_smart(request: SellSmartRequest):
             confidence_score=calculate_confidence(data_freshness=0.95)
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))

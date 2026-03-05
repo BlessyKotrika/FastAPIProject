@@ -1,8 +1,14 @@
 from typing import List, Dict, Any
-from app.services.bedrock_service import bedrock_service
+from app.services.bedrock_service import BedrockService
 from app.utils.confidence import calculate_confidence
+from app.utils.exceptions import ExternalServiceError
 
 class RecommendationEngine:
+    def __init__(self, weather_service, mandi_service, bedrock_service: BedrockService):
+        self.weather_service = weather_service
+        self.mandi_service = mandi_service
+        self.bedrock_service = bedrock_service
+
     def generate_today_actions(self, crop: str, stage: str, weather_data: Dict[str, Any], language: str):
         """Generates actionable advice based on crop stage and weather."""
         
@@ -24,7 +30,10 @@ class RecommendationEngine:
         """
         
         prompt = f"Generate action cards for {crop} at {stage} stage given the weather summary: {weather_summary}."
-        response_json = bedrock_service.invoke_claude(prompt, system_prompt)
+        try:
+            response_json = self.bedrock_service.invoke_claude(prompt, system_prompt)
+        except Exception as e:
+            raise ExternalServiceError("Bedrock LLM", detail=str(e))
         
         # Add metadata
         response_json["weather_risk"] = {
@@ -36,5 +45,3 @@ class RecommendationEngine:
         response_json["sources"] = ["Regional Advisory Bulletin"]
         
         return response_json
-
-recommendation_engine = RecommendationEngine()
