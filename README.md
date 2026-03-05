@@ -5,6 +5,9 @@ KhetiPulse is a comprehensive, multilingual platform designed to assist Indian f
 ## 🚀 Quick Start Guide
 
 **For full setup and running instructions, please refer to:**
+👉 **[LOCAL_SETUP_GUIDE.md](./LOCAL_SETUP_GUIDE.md)**
+
+For AWS Cloud Deployment (SAM/Lambda):
 👉 **[FULL_RUN_GUIDE.md](./FULL_RUN_GUIDE.md)**
 
 ---
