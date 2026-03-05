@@ -16,7 +16,12 @@ class RAGService:
             }
 
         # Step 1: Retrieve relevant chunks from Bedrock KB
-        query_context = f"Crop: {crop}, Location: {location}, Question: {question}"
+        query_context = question
+        if crop:
+            query_context = f"Crop: {crop}, {query_context}"
+        if location:
+            query_context = f"Location: {location}, {query_context}"
+        
         try:
             retrieved_results = self.bedrock_service.retrieve_from_kb(query_context)
         except Exception as e:

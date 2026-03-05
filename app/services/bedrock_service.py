@@ -65,7 +65,8 @@ class BedrockService:
                 retrievalQuery={'text': query},
                 retrievalConfiguration={
                     'vectorSearchConfiguration': {
-                        'numberOfResults': 3
+                        'numberOfResults': 3,
+                        'overrideSearchType': 'HYBRID'
                     }
                 }
             )
