@@ -53,6 +53,7 @@ export const sellSmartService = {
   getMandiData: async (data: {
     crop: string;
     location: string;
+    state: string;
     language: string;
   }) => {
     const response = await api.post('/sell-smart/', data);

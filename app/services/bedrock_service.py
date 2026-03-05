@@ -1,7 +1,10 @@
 import json
+import logging
 from typing import Dict, List, Any
 import boto3
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 class BedrockService:
     def __init__(self):
@@ -68,7 +71,7 @@ class BedrockService:
             )
             return response.get('retrievalResults', [])
         except Exception as e:
-            print(f"Error retrieving from KB: {e}")
-            return []
+            logger.error(f"Error retrieving from KB: {e}", exc_info=True)
+            raise
 
 bedrock_service = BedrockService()

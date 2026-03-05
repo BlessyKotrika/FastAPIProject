@@ -12,6 +12,7 @@ export default function MandiPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showAllMarkets, setShowAllMarkets] = useState(false);
 
   useEffect(() => {
     fetchMandi();
@@ -23,6 +24,7 @@ export default function MandiPage() {
       const res = await sellSmartService.getMandiData({
         crop: profile.crop || 'Wheat',
         location: profile.location || 'Barabanki',
+        state: profile.state || '',
         language: profile.language,
       });
       setData(res);
@@ -93,14 +95,24 @@ export default function MandiPage() {
         <section className="space-y-4 px-1">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest">{t('mandi.nearbyMarkets')}</h3>
-            <button className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">{t('mandi.seeAll')}</button>
+            {!showAllMarkets && data?.all_markets?.length > 2 && (
+              <button 
+                onClick={() => setShowAllMarkets(true)}
+                className="text-[10px] font-bold text-primary-600 uppercase tracking-widest"
+              >
+                {t('mandi.seeAll')}
+              </button>
+            )}
           </div>
-          {[
-            { name: 'Lucknow Central', dist: '22 km', price: '₹2410' },
-            { name: 'Haidergarh Mandi', dist: '35 km', price: '₹2380' }
-          ].map((m, i) => (
+          {(showAllMarkets ? data?.all_markets : data?.all_markets?.slice(0, 2) || [
+            { Market: 'Lucknow Central', District: 'Lucknow', Modal_Price: '2410' },
+            { Market: 'Haidergarh Mandi', District: 'Barabanki', Modal_Price: '2380' }
+          ]).map((m: any, i: number) => (
             <motion.div 
               key={i} 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
               whileTap={{ scale: 0.98 }}
               className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
             >
@@ -109,21 +121,29 @@ export default function MandiPage() {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-800 text-sm leading-tight">{m.name}</p>
-                  <p className="text-[10px] font-medium text-slate-400 mt-0.5">{m.dist} {t('mandi.away')}</p>
+                  <p className="font-bold text-slate-800 text-sm leading-tight">{m.Market || m.name}</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-0.5">{m.District || m.dist}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-bold text-primary-600 text-lg tracking-tight">{m.price}</p>
+                <p className="font-bold text-primary-600 text-lg tracking-tight">₹{m.Modal_Price || m.price}</p>
               </div>
             </motion.div>
           ))}
+          {showAllMarkets && (
+             <button 
+                onClick={() => setShowAllMarkets(false)}
+                className="w-full py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-primary-600 transition-colors"
+              >
+                Show Less
+              </button>
+          )}
         </section>
 
         {/* Recommendation Tip */}
         <div className="bg-slate-900 rounded-[1.5rem] p-5 flex gap-4 shadow-xl shadow-slate-200">
           <div className="bg-white/10 p-3 rounded-xl shrink-0">
-            <info className="w-6 h-6 text-primary-400" />
+            <Info className="w-6 h-6 text-primary-400" />
           </div>
           <p className="text-xs font-medium text-slate-300 leading-relaxed">
             {t('mandi.tip', { crop: t(`onboarding.crops.${profile.crop}`) || profile.crop })}

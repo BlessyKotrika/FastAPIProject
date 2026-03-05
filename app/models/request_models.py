@@ -21,6 +21,7 @@ class TodayRequest(UserBase):
 class SellSmartRequest(BaseModel):
     crop: str = Field(..., example="Wheat")
     location: str = Field(..., example="Barabanki")
+    state: Optional[str] = Field(None, example="Uttar Pradesh")
     language: Language = Field(default=Language.HINDI)
 
 class ChatRequest(BaseModel):

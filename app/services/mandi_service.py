@@ -11,7 +11,7 @@ class MandiService:
         self.resource_id = settings.AGMARKNET_RESOURCE_ID
         self.base_url = "https://api.data.gov.in/resource/"
 
-    async def get_mandi_data(self, crop: str, location: str):
+    async def get_mandi_data(self, crop: str, location: str, state: str = None):
         """Fetches AGMARKNET data from Gov API."""
         try:
             params = {
@@ -21,6 +21,8 @@ class MandiService:
                 "filters[commodity]": crop,
                 "filters[district]": location
             }
+            if state:
+                params["filters[state]"] = state
             
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
@@ -29,10 +31,17 @@ class MandiService:
                 
                 records = data.get("records", [])
                 if not records:
-                    # Try broader search (just commodity) if district returns nothing
-                    params.pop("filters[district]")
-                    response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
-                    records = response.json().get("records", [])
+                    # Try broader search (district + commodity) without state if district+state+commodity returns nothing
+                    if state:
+                        params.pop("filters[state]")
+                        response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
+                        records = response.json().get("records", [])
+                    
+                    if not records:
+                        # Try even broader search (just commodity) if district returns nothing
+                        params.pop("filters[district]")
+                        response = await client.get(f"{self.base_url}{self.resource_id}", params=params)
+                        records = response.json().get("records", [])
                 
                 return records
         except Exception as e:

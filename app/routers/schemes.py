@@ -9,20 +9,61 @@ router = APIRouter()
 @router.post("/", response_model=SchemeResponse)
 async def get_schemes(request: SchemeRequest, rag_service: RAGService = Depends(get_rag_service)):
     try:
+        # Step 1: Broaden the query to capture more government schemes
+        query = f"Provide a detailed list of all applicable government schemes for a {request.category} farmer in {request.state} for {request.crop} with {request.land_size} hectares. Include PM-KISAN, PM-FBY, and any state-specific schemes."
+        
         # Use RAG to find schemes based on criteria
-        query = f"Schemes for {request.category} farmers in {request.state} for {request.crop} with {request.land_size} hectares."
         response = rag_service.answer_question(
             question=query,
             language=request.language,
             crop=request.crop
         )
         
-        # In production, LLM should return structured eligibility details.
-        # Here we extract from RAG response or use mock for structure.
+        # Step 2: Extract data from LLM response if available, or use comprehensive defaults
+        # In production, we expect the LLM to return these keys based on the context it finds
+        schemes = response.get("schemes")
+        
+        # If RAG returned text instead of a structured object (fallback case)
+        if not schemes:
+            # More comprehensive default list of schemes relevant across India
+            schemes = [
+                {
+                    "name": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
+                    "description": "Income support of ₹6,000 per year in three installments to all landholding farmer families.",
+                    "documents": ["Aadhaar Card", "Land Ownership Documents", "Bank Passbook"],
+                    "link": "https://pmkisan.gov.in/"
+                },
+                {
+                    "name": "PM-FBY (Pradhan Mantri Fasal Bima Yojana)",
+                    "description": "Crop insurance scheme for protection against crop failure due to natural calamities, pests or diseases.",
+                    "documents": ["Aadhaar Card", "Land Possession Certificate", "Sowing Certificate", "Bank Details"],
+                    "link": "https://pmfby.gov.in/"
+                },
+                {
+                    "name": "KCC (Kisan Credit Card)",
+                    "description": "Provides farmers with timely access to credit for agricultural needs at low interest rates.",
+                    "documents": ["Aadhaar Card", "Land Documents", "Passport Size Photos", "Bank Details"],
+                    "link": "https://www.sbi.co.in/web/personal-banking/loans/agriculture-banking/kisan-credit-card"
+                },
+                {
+                    "name": f"State-Specific {request.state} Agriculture Subsidy",
+                    "description": f"State government subsidies for seeds, fertilizers, and machinery in {request.state}.",
+                    "documents": ["Farmer Registration ID", "Land Documents", "Aadhaar Card"],
+                    "link": f"https://agriculture.{request.state.lower().replace(' ', '')}.gov.in/"
+                },
+                {
+                    "name": "PM-KMY (Pradhan Mantri Kisan Maandhan Yojana)",
+                    "description": "A voluntary and contributory pension scheme for all Small and Marginal Farmers (SMF).",
+                    "documents": ["Aadhaar Card", "Savings Bank Account / PM-Kisan Account"],
+                    "link": "https://maandhan.in/"
+                }
+            ]
+
         return SchemeResponse(
-            eligible_schemes=response.get("eligible_schemes", ["PM-KISAN"]),
-            documents_required=response.get("documents_required", ["Aadhaar", "Land Records"]),
-            application_links=response.get("application_links", ["https://pmkisan.gov.in/"])
+            schemes=schemes,
+            eligible_schemes=[s["name"] for s in schemes],
+            documents_required=list(set([doc for s in schemes for doc in s["documents"]])),
+            application_links=[s["link"] for s in schemes]
         )
     except Exception as e:
         if isinstance(e, HTTPException):

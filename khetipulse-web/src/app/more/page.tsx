@@ -23,6 +23,23 @@ export default function MorePage() {
   const { profile, setProfile, logout } = useAppStore();
   const { t } = useTranslation();
   const [showLangModal, setShowLangModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    full_name: profile.full_name || '',
+    mobile_number: profile.mobile_number || '',
+    district: profile.district || '',
+    state: profile.state || '',
+    crop: profile.crop || '',
+    sowing_date: profile.sowing_date || '',
+  });
+
+  const handleEditSave = () => {
+    setProfile({
+      ...editForm,
+      location: editForm.district, // for backward compatibility
+    });
+    setShowEditModal(false);
+  };
 
   const menuItems = [
     { id: 'lang', label: t('more.langSettings'), icon: Languages, value: profile.language.toUpperCase(), color: 'bg-blue-50 text-blue-600' },
@@ -51,8 +68,24 @@ export default function MorePage() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100"
+          className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 relative group"
         >
+          <button 
+            onClick={() => {
+              setEditForm({
+                full_name: profile.full_name || '',
+                mobile_number: profile.mobile_number || '',
+                district: profile.district || '',
+                state: profile.state || '',
+                crop: profile.crop || '',
+                sowing_date: profile.sowing_date || '',
+              });
+              setShowEditModal(true);
+            }}
+            className="absolute top-6 right-6 p-2 bg-primary-50 text-primary-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Settings size={18} />
+          </button>
           <div className="flex items-center gap-4 mb-6">
             <div className="bg-primary-600 w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary-200 overflow-hidden">
               {profile.picture ? (
@@ -175,6 +208,100 @@ export default function MorePage() {
                     </button>
                   ))}
                 </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Edit Profile Modal */}
+        <AnimatePresence>
+          {showEditModal && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowEditModal(false)}
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
+              />
+              <motion.div 
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 z-50 shadow-2xl max-w-md mx-auto overflow-y-auto max-h-[90vh]"
+              >
+                <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8" />
+                <h3 className="text-2xl font-bold text-slate-900 mb-6">{t('more.profile')}</h3>
+                
+                <div className="space-y-4 mb-8">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('common.fullName')}</label>
+                    <input 
+                      type="text"
+                      className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
+                      value={editForm.full_name}
+                      onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('more.mobile')}</label>
+                    <input 
+                      type="text"
+                      className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
+                      value={editForm.mobile_number}
+                      onChange={(e) => setEditForm({...editForm, mobile_number: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.state')}</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
+                        value={editForm.state}
+                        onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.district')}</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
+                        value={editForm.district}
+                        onChange={(e) => setEditForm({...editForm, district: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.cropName')}</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800 appearance-none"
+                      value={editForm.crop}
+                      onChange={(e) => setEditForm({...editForm, crop: e.target.value})}
+                    >
+                      <option value="wheat">{t('onboarding.crops.wheat')}</option>
+                      <option value="paddy">{t('onboarding.crops.paddy')}</option>
+                      <option value="cotton">{t('onboarding.crops.cotton')}</option>
+                      <option value="maize">{t('onboarding.crops.maize')}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.sowingDate')}</label>
+                    <input 
+                      type="date"
+                      className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
+                      value={editForm.sowing_date}
+                      onChange={(e) => setEditForm({...editForm, sowing_date: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleEditSave}
+                  className="w-full bg-primary-600 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-lg shadow-primary-100 active:scale-95 transition-all mb-4"
+                >
+                  {t('common.continue')}
+                </button>
               </motion.div>
             </>
           )}
