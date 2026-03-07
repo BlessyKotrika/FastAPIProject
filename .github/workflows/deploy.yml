@@ -123,30 +123,12 @@ jobs:
           STACK_NAME="khetipulse-prod"
           TEMPLATE_FILE="ecs-template.yaml"
           
-          # Check if stack exists
-          if aws cloudformation describe-stacks --stack-name $STACK_NAME --region ${{ env.AWS_REGION }} >/dev/null 2>&1; then
-            echo "Stack exists, updating..."
-            aws cloudformation update-stack \
-              --stack-name $STACK_NAME \
-              --template-body file://$TEMPLATE_FILE \
-              --parameters ParameterKey=EnvironmentName,ParameterValue=prod \
-              --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-              --region ${{ env.AWS_REGION }}
-            
-            # Wait for update to complete
-            aws cloudformation wait stack-update-complete --stack-name $STACK_NAME --region ${{ env.AWS_REGION }}
-          else
-            echo "Stack does not exist, creating..."
-            aws cloudformation create-stack \
-              --stack-name $STACK_NAME \
-              --template-body file://$TEMPLATE_FILE \
-              --parameters ParameterKey=EnvironmentName,ParameterValue=prod \
-              --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-              --region ${{ env.AWS_REGION }}
-            
-            # Wait for creation to complete
-            aws cloudformation wait stack-create-complete --stack-name $STACK_NAME --region ${{ env.AWS_REGION }}
-          fi
+          aws cloudformation deploy \
+          --stack-name $STACK_NAME \
+          --template-file $TEMPLATE_FILE \
+          --parameter-overrides EnvironmentName=prod \
+          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --region ${{ env.AWS_REGION }}
           
           # Get Load Balancer URL for reference
           ALB_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region ${{ env.AWS_REGION }} --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerURL`].OutputValue' --output text)
