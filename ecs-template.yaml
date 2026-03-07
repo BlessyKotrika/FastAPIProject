@@ -433,7 +433,7 @@ Resources:
     Properties:
       MaxCapacity: 10
       MinCapacity: 2
-      ResourceId: !Sub 'service/${ECSCluster}/${ECSService}'
+      ResourceId: !Sub 'service/${AWS::StackName}-cluster/${AWS::StackName}-service'
       RoleARN: !GetAtt ECSAutoScalingRole.Arn
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
