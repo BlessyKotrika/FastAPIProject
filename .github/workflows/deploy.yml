@@ -128,7 +128,7 @@ jobs:
             aws cloudformation update-stack \
               --stack-name $STACK_NAME \
               --template-body file://$TEMPLATE_FILE \
-              --parameters ParameterKey=Environment,ParameterValue=prod \
+              --parameters ParameterKey=EnvironmentName,ParameterValue=prod \
               --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
               --region ${{ env.AWS_REGION }}
             
@@ -139,7 +139,7 @@ jobs:
             aws cloudformation create-stack \
               --stack-name $STACK_NAME \
               --template-body file://$TEMPLATE_FILE \
-              --parameters ParameterKey=Environment,ParameterValue=prod \
+              --parameters ParameterKey=EnvironmentName,ParameterValue=prod \
               --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
               --region ${{ env.AWS_REGION }}
             
