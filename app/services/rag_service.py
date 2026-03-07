@@ -82,6 +82,78 @@ class RAGService:
             except Exception:
                 return None
         return None
+    def _generate_social_reply(
+        self,
+        question: str,
+        language: str,
+        crop: Optional[str] = None,
+        location: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-based response for greeting/thanks/short social turns.
+        Keeps response concise and farmer-focused.
+        """
+        system_prompt = f"""
+    You are KhetiPulse AI, a warm and respectful assistant for Indian farmers.
+    Language: {language}
+
+    Return ONLY valid JSON with keys:
+    message_type, answer, confidence_score, checklist, do, dont
+
+    Rules:
+    - message_type must be "advice"
+    - answer should be 1-2 short sentences only
+    - for greeting/thanks/acknowledgement, respond politely and ask what farm help is needed
+    - do not provide long technical advice unless asked
+    """
+
+        prompt = f"""
+    User message: {question}
+    Farmer profile context:
+    - crop: {crop or "unknown"}
+    - location: {location or "unknown"}
+    """
+
+        try:
+            response_json = self.bedrock_service.invoke_claude(prompt=prompt, system_prompt=system_prompt)
+            if not isinstance(response_json, dict):
+                response_json = {"text": str(response_json)}
+
+            out = self._normalize_output(
+                response_json=response_json,
+                default_message_type="advice",
+                default_confidence=0.9,
+                citations=[]
+            )
+
+            # keep social responses concise + clean
+            out["answer"] = self._truncate_words(out["answer"], 40)
+            out["checklist"] = []
+            out["do"] = []
+            out["dont"] = []
+            out["schemes"] = []
+            out["eligible_schemes"] = []
+            out["documents_required"] = []
+            out["application_links"] = []
+            out["citations"] = []
+            out["confidence_score"] = max(out["confidence_score"], 0.85)
+            return out
+
+        except Exception:
+            # safe fallback if LLM call fails
+            return {
+                "message_type": "advice",
+                "answer": "Namaste! Happy to help. Please share your crop and what issue you want guidance on.",
+                "confidence_score": 0.85,
+                "citations": [],
+                "checklist": [],
+                "do": [],
+                "dont": [],
+                "schemes": [],
+                "eligible_schemes": [],
+                "documents_required": [],
+                "application_links": []
+            }
 
     def _is_low_information_turn(self, q: str) -> bool:
         q = (q or "").strip().lower()
@@ -337,19 +409,12 @@ Recent conversation:
         if not use_rag:
             # Handle greeting/thanks/very short social turns gracefully
             if self._is_low_information_turn(question):
-                return {
-                    "message_type": "advice",
-                    "answer": "Namaste! I can help with crop care, pests, irrigation, fertilizer, yield, mandi prices, and schemes. What do you need help with today?",
-                    "confidence_score": 0.9,
-                    "citations": [],
-                    "checklist": [],
-                    "do": [],
-                    "dont": [],
-                    "schemes": [],
-                    "eligible_schemes": [],
-                    "documents_required": [],
-                    "application_links": []
-                }
+                return self._generate_social_reply(
+                    question=question,
+                    language=language,
+                    crop=crop,
+                    location=location
+                )
 
             high_risk_agri = is_high_risk_agri_query(question)
 
@@ -373,7 +438,6 @@ Rules:
 
             direct_prompt = f"""
 Farmer profile:
-- crop: {crop or "unknown"}
 - location: {location or "unknown"}
 
 Conversation summary:
@@ -397,12 +461,9 @@ Current question:
             out = self._normalize_output(
                 response_json=response_json,
                 default_message_type="advice",
-                default_confidence=0.55,
+                default_confidence=0.7,
                 citations=[]
             )
-
-            if out["message_type"] == "advice":
-                out["confidence_score"] = min(out["confidence_score"], 0.65)
 
             # No schemes/citations in LLM-only mode
             out["schemes"] = []
@@ -616,10 +677,8 @@ Farmer question:
             citations=unique_citations
         )
 
-        if intent == "scheme":
-            out["confidence_score"] = min(out["confidence_score"], 0.85)
-        elif intent == "market":
-            out["confidence_score"] = min(out["confidence_score"], 0.8)
+
+        if intent == "market":
             out["schemes"] = []
             out["eligible_schemes"] = []
             out["documents_required"] = []

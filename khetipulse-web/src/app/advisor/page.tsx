@@ -21,7 +21,7 @@ export default function AdvisorPage() {
   const { t } = useTranslation();
 
   const welcomeText =
-    "Namaste! I am your KhetiPulse AI advisor. How can I help you with your farm today?";
+     "Namaste! I can help with crop care, pests, irrigation, fertilizer, yield, mandi prices, and schemes. What do you need help with today?";
 
   const [messages, setMessages] = useState<Message[]>([
     { role: "bot", text: welcomeText },
