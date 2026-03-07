@@ -46,8 +46,26 @@ build/
 # Logs
 *.log
 
-# Local DB / runtime files
-*.sqlite3
+# AWS / Cloud
+.terraform/
+terraform.tfstate*
+*.tfvars
+
+# Docker
+.dockerignore
+
+# Local development
+dynamodb-data/
+
+# Build artifacts
+.next/
+out/
+build/
+dist/
+
+# Logs
+*.log
+logs/
 *.db
 
 # -----------------------------

@@ -4,10 +4,13 @@ KhetiPulse is a comprehensive, multilingual platform designed to assist Indian f
 
 ## 🚀 Quick Start Guide
 
-**For full setup and running instructions, please refer to:**
+**For local development:**
 👉 **[LOCAL_SETUP_GUIDE.md](./LOCAL_SETUP_GUIDE.md)**
 
-For AWS Cloud Deployment (SAM/Lambda):
+**For AWS ECS deployment with CI/CD:**
+👉 **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)**
+
+**For legacy AWS Lambda deployment:**
 👉 **[FULL_RUN_GUIDE.md](./FULL_RUN_GUIDE.md)**
 
 ---
@@ -29,17 +32,30 @@ Users can set their preferred language via the onboarding wizard or the `/prefer
 
 ---
 
-## ☁️ Deployment to AWS (Lambda)
+## ☁️ Deployment Options
 
-1. **Build**:
-   ```bash
-   sam build
-   ```
-2. **Deploy**:
-   ```bash
-   sam deploy --guided
-   ```
-   Follow the prompts to set the stack name and region. Note the `ApiUrl` in the outputs.
+### Option 1: AWS ECS with Load Balancer (Recommended)
+**Features:**
+- Auto-scaling ECS Fargate tasks
+- Application Load Balancer for high availability
+- GitHub Actions CI/CD pipeline
+- Production-ready infrastructure
+
+**Quick Deploy:**
+```bash
+# 1. Set up AWS infrastructure
+./setup-aws-infrastructure.sh
+
+# 2. Configure API keys in SSM Parameter Store
+# 3. Push to GitHub main branch for automatic deployment
+```
+
+### Option 2: AWS Lambda (Legacy)
+**For serverless deployment:**
+```bash
+sam build
+sam deploy --guided
+```
 
 ---
 
