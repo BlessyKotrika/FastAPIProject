@@ -24,8 +24,9 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: khetipulse-api
-  ECS_SERVICE: khetipulse-service
-  ECS_CLUSTER: khetipulse-cluster
+  ECS_SERVICE: khetipulse-prod-service
+  ECS_CLUSTER: khetipulse-prod-cluster
+  TASK_DEFINITION: khetipulse-prod-task
   CONTAINER_NAME: khetipulse-api
 
 jobs:
@@ -157,8 +158,8 @@ jobs:
       - name: Download task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition ${{ env.ECS_SERVICE }} \
-            --query taskDefinition > task-definition.json
+          --task-definition ${{ env.TASK_DEFINITION }} \
+          --query taskDefinition > task-definition.json
 
       - name: Update task definition
         id: task-def
