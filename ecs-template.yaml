@@ -364,6 +364,8 @@ Resources:
               Value: !Sub '{{resolve:secretsmanager:/khetipulse/${EnvironmentName}/AGMARKNET_API_KEY:SecretString}}'
             - Name: BEDROCK_KB_ID
               Value: !Sub '{{resolve:secretsmanager:/khetipulse/${EnvironmentName}/BEDROCK_KB_ID:SecretString}}'
+            - Name: SECRET_KEY
+              Value: !Sub '{{resolve:secretsmanager:/khetipulse/${EnvironmentName}/SECRET_KEY:SecretString}}'
           LogConfiguration:
             LogDriver: awslogs
             Options:
