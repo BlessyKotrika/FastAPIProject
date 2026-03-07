@@ -25,10 +25,23 @@ class SellSmartRequest(BaseModel):
     language: Language = Field(default=Language.HINDI)
 
 class ChatRequest(BaseModel):
-    question: str = Field(..., example="When should I harvest my wheat?")
+    question: str = Field(..., min_length=1, example="When should I harvest my wheat?")
     language: Language = Field(default=Language.HINDI)
     crop: Optional[str] = Field(None, example="Wheat")
     location: Optional[str] = Field(None, example="Barabanki")
+
+    # New fields for conversation continuity
+    conversation_id: Optional[str] = Field(
+        None,
+        description="Existing conversation id for multi-turn chat",
+        example="conv_1f8f0f3a"
+    )
+    client_message_id: Optional[str] = Field(
+        None,
+        description="Client-generated idempotency key for this user message",
+        example="msg_client_123"
+    )
+    advisory_mode: Optional[str] = Field("llm", description="llm or schemes")
 
 class SchemeRequest(BaseModel):
     state: str = Field(..., example="Uttar Pradesh")
