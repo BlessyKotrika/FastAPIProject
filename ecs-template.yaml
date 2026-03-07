@@ -246,9 +246,9 @@ Resources:
       Port: !Ref ContainerPort
       Protocol: HTTP
       TargetType: ip
-      HealthCheckPath: /
+      HealthCheckPath: /      # backend responds 200 at root
       HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 2
       Matcher:
@@ -403,6 +403,7 @@ Resources:
         - TargetGroupArn: !Ref TargetGroup
           ContainerName: khetipulse-api
           ContainerPort: !Ref ContainerPort
+      HealthCheckGracePeriodSeconds: 60   # give container time to start before ALB ping
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-service'
