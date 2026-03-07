@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
 
     # CORS Settings
-    CORS_ORIGINS: str = "*"
+    CORS_ORIGINS: str = "http://kheti-pulse-frontend.s3-website-us-east-1.amazonaws.com"
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 

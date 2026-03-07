@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { useAppStore } from '@/lib/store';
-
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://khetipulse-prod-alb-371796700.us-east-1.elb.amazonaws.com',
   headers: {
     'Content-Type': 'application/json',
   },

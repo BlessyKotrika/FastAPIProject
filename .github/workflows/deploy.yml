@@ -11,6 +11,7 @@ on:
       - 'Dockerfile'
       - 'ecs-template.yaml'
       - '.github/workflows/deploy.yml'
+      - 'khetipulse-web/**'
   pull_request:
     branches:
       - main
@@ -20,6 +21,7 @@ on:
       - 'Dockerfile'
       - 'ecs-template.yaml'
       - '.github/workflows/deploy.yml'
+      - 'khetipulse-web/**'
 
 env:
   AWS_REGION: us-east-1
@@ -28,6 +30,7 @@ env:
   ECS_CLUSTER: khetipulse-prod-cluster
   TASK_DEFINITION: khetipulse-prod-task
   CONTAINER_NAME: khetipulse-api
+  FRONTEND_BUCKET: kheti-pulse-frontend
 
 jobs:
   test:
@@ -96,6 +99,13 @@ jobs:
             fi
           done
           echo "✅ All required secrets exist"
+          
+          # Check if frontend S3 bucket exists, create if not
+          if ! aws s3api head-bucket --bucket ${{ env.FRONTEND_BUCKET }} --region ${{ env.AWS_REGION }} >/dev/null 2>&1; then
+            echo "Creating frontend S3 bucket: ${{ env.FRONTEND_BUCKET }}"
+            aws s3api create-bucket --bucket ${{ env.FRONTEND_BUCKET }} --region ${{ env.AWS_REGION }} --create-bucket-configuration LocationConstraint=${{ env.AWS_REGION }}
+          fi
+          echo "✅ Frontend S3 bucket ready"
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -159,10 +169,39 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
+      - name: Build Frontend
+        run: |
+          cd khetipulse-web
+          npm ci
+          echo "NEXT_PUBLIC_API_URL=$ALB_URL" >> .env.local
+          npm run build
+          npm run export
+
+      - name: Deploy Frontend to S3
+        run: |
+          cd khetipulse-web
+          aws s3 sync out/ s3://${{ env.FRONTEND_BUCKET }}/ --delete
+          aws s3 website s3://${{ env.FRONTEND_BUCKET }}/ --index-document index.html --error-document 404.html
+          
+          # Set bucket policy for public read access
+          aws s3api put-bucket-policy --bucket ${{ env.FRONTEND_BUCKET }} --policy '{
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "PublicReadGetObject",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::${{ env.FRONTEND_BUCKET }}/*"
+              }
+            ]
+          }'
+
       - name: Deployment Summary
         run: |
           echo "🚀 Deployment completed successfully!"
-          echo "📍 Application URL: ${{ env.ALB_URL }}"
+          echo "📍 Backend API: ${{ env.ALB_URL }}"
+          echo "🌐 Frontend: http://${{ env.FRONTEND_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
           echo "🔗 ECS Cluster: ${{ env.ECS_CLUSTER }}"
           echo "🛠️  ECS Service: ${{ env.ECS_SERVICE }}"
           echo "🐳 Docker Image: ${{ env.IMAGE_URI }}"
