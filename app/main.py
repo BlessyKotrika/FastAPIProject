@@ -67,7 +67,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS.split(",") if hasattr(settings, 'CORS_ORIGINS') and settings.CORS_ORIGINS else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -92,5 +92,7 @@ app.include_router(schemes.router, prefix="/schemes", tags=["Schemes"])
 async def health_check():
     return {"status": "healthy", "service": settings.APP_NAME}
 
-# Lambda Handler
-handler = Mangum(app)
+# For local development and ECS deployment
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,6 +1,5 @@
 fastapi
-mangum
-uvicorn
+uvicorn[standard]
 pydantic
 pydantic-settings
 boto3
