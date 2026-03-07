@@ -175,7 +175,6 @@ jobs:
           npm ci
           echo "NEXT_PUBLIC_API_URL=$ALB_URL" >> .env.local
           npm run build
-          npm run export
 
       - name: Deploy Frontend to S3
         run: |
