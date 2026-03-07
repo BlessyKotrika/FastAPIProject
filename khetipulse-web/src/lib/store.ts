@@ -3,9 +3,7 @@ import { persist } from 'zustand/middleware';
 
 interface UserProfile {
   user_id: string;
-  email?: string;
   full_name?: string;
-  picture?: string;
   mobile_number: string;
   language: string;
   crop: string;

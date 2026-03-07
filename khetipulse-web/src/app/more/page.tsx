@@ -88,15 +88,11 @@ export default function MorePage() {
           </button>
           <div className="flex items-center gap-4 mb-6">
             <div className="bg-primary-600 w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary-200 overflow-hidden">
-              {profile.picture ? (
-                <img src={profile.picture} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <UserCircle2 size={40} />
-              )}
+              <UserCircle2 size={40} />
             </div>
             <div>
               <h3 className="font-bold text-lg text-slate-900 leading-tight">{profile.full_name || t('more.profile')}</h3>
-              <p className="text-sm font-medium text-slate-400 mt-1">{profile.email || profile.user_id}</p>
+              <p className="text-sm font-medium text-slate-400 mt-1">{profile.user_id}</p>
             </div>
           </div>
 

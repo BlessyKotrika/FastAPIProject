@@ -40,9 +40,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 class UserResponse(BaseModel):
-    id: int
+    user_id: str
     username: str
-    email: Optional[str] = None
     full_name: Optional[str] = None
     mobile_number: Optional[str] = None
-    picture: Optional[str] = None

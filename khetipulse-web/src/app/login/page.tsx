@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from 'react';
-import { GoogleLogin } from '@react-oauth/google';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/i18n';
 import { authService } from '@/services/api';
@@ -65,30 +64,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    setLoading(true);
-    setError('');
-    try {
-      const { access_token } = await authService.loginWithGoogle(credentialResponse.credential);
-      await finalizeLogin(access_token);
-    } catch (err: any) {
-      console.error(err);
-      let errorMessage = 'Google Login failed. Please try again.';
-      if (err.response?.data?.detail) {
-        if (typeof err.response.data.detail === 'string') {
-          errorMessage = err.response.data.detail;
-        } else if (Array.isArray(err.response.data.detail)) {
-          errorMessage = `Validation Error: ${err.response.data.detail.map((e: any) => e.msg).join(', ')}`;
-        } else if (typeof err.response.data.detail === 'object') {
-          errorMessage = JSON.stringify(err.response.data.detail);
-        }
-      }
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const finalizeLogin = async (token: string) => {
     // Update store with token
     setAuth({ token: token, isAuthenticated: true });
@@ -97,9 +72,7 @@ export default function LoginPage() {
     const user = await authService.getMe();
     setProfile({
       user_id: user.username,
-      email: user.email,
       full_name: user.full_name,
-      picture: user.picture,
       mobile_number: user.mobile_number || '',
     });
 
@@ -220,24 +193,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-            <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold text-slate-400">
-              <span className="bg-white px-4">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google Login Failed')}
-              theme="outline"
-              shape="pill"
-              text="continue_with"
-              width="100%"
-            />
-          </div>
 
           <AnimatePresence>
             {error && (

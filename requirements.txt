@@ -9,7 +9,7 @@ python-multipart
 python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
-google-auth
-google-auth-oauthlib
 pytest
 pytest-asyncio
+bcrypt
+argon2-cffi

@@ -50,6 +50,3 @@ class UserRegisterRequest(BaseModel):
     password: str = Field(..., min_length=6, example="secure_password")
     full_name: Optional[str] = Field(None, example="John Doe")
     mobile_number: Optional[str] = Field(None, example="9876543210")
-
-class GoogleAuthRequest(BaseModel):
-    id_token: str = Field(..., description="Google ID Token")

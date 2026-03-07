@@ -77,3 +77,4 @@ khetipulse-web/pnpm-debug.log*
 # -----------------------------
 # uv.lock
 # khetipulse-web/package-lock.json
+/venv
