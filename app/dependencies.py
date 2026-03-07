@@ -18,6 +18,7 @@ from app.services.rag_service import RAGService
 from app.services.weather_service import WeatherService
 from app.services.mandi_service import MandiService
 from app.services.recommendation_engine import RecommendationEngine
+from app.services.chat_history_service import ChatHistoryService  # NEW
 
 # Pre-instantiate services (could also be done per-request if needed)
 _bedrock_service = BedrockService()
@@ -25,6 +26,7 @@ _rag_service = RAGService(_bedrock_service)
 _weather_service = WeatherService()
 _mandi_service = MandiService()
 _recommendation_engine = RecommendationEngine(_weather_service, _mandi_service, _bedrock_service)
+_chat_history_service = ChatHistoryService()  # NEW
 
 def get_bedrock_service() -> BedrockService:
     return _bedrock_service
@@ -40,3 +42,6 @@ def get_mandi_service() -> MandiService:
 
 def get_recommendation_engine() -> RecommendationEngine:
     return _recommendation_engine
+
+def get_chat_history_service() -> ChatHistoryService:  # NEW
+    return _chat_history_service

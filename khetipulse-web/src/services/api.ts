@@ -17,6 +17,41 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export interface SchemeItem {
+  name: string;
+  description: string;
+  documents: string[];
+  link: string;
+}
+
+export type ChatMessageType = 'advice' | 'schemes' | 'refusal' | 'fallback';
+
+export interface ChatAskRequest {
+  question: string;
+  language: string;
+  crop?: string;
+  location?: string;
+  conversation_id?: string;
+  client_message_id?: string;
+  advisory_mode?: "llm" | "schemes";
+}
+
+export interface ChatAskResponse {
+  conversation_id: string;
+  message_id: string;
+  message_type: ChatMessageType;
+  answer: string;
+  confidence_score: number;
+  citations: string[];
+  checklist: string[];
+  do: string[];
+  dont: string[];
+  schemes: SchemeItem[];
+  eligible_schemes: string[];
+  documents_required: string[];
+  application_links: string[];
+}
+
 export const authService = {
   login: async (data: any) => {
     const response = await api.post('/auth/login', data);
@@ -58,12 +93,7 @@ export const sellSmartService = {
 };
 
 export const chatService = {
-  ask: async (data: {
-    question: string;
-    language: string;
-    crop?: string;
-    location?: string;
-  }) => {
+  ask: async (data: ChatAskRequest): Promise<ChatAskResponse> => {
     const response = await api.post('/chat/', data);
     return response.data;
   },
