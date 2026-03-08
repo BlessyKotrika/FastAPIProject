@@ -19,7 +19,8 @@ KhetiPulse supports: **English (en), Hindi (hi), Telugu (te), Tamil (ta), and Be
 
 **Core Capabilities:**
 - **AI Advisor (RAG)**: Contextual farming advice using AWS Bedrock Claude 3 Haiku and Knowledge Bases.
-- **Smart Mandi**: Real-time market prices from Agmarknet API with trend analysis.
+- **Smart Mandi**: Real-time market prices from Agmarknet API with a multi-level fallback mechanism (District+State → State → District → Crop) and trend analysis.
+- **Onboarding API**: Centralized state, district, and crop metadata for improved resilience.
 - **Weather Actions**: Hyper-local weather forecast (OpenWeather API) and recommended farm actions.
 - **Local & Google Auth**: Secure user accounts with JWT-based local login or Google OAuth2.
 
@@ -77,16 +78,28 @@ sam deploy --guided
 
 ---
 
-## 🧪 Testing the Multilingual APIs
+## 🧪 Testing the APIs
 
-### 1. Set Language Preference
+### 1. Onboarding (Metadata)
+```bash
+# Get all supported states
+curl -X GET "http://localhost:8000/onboarding/states"
+
+# Get districts for a specific state
+curl -X GET "http://localhost:8000/onboarding/districts/Uttar%20Pradesh"
+
+# Get all supported crops
+curl -X GET "http://localhost:8000/onboarding/crops"
+```
+
+### 2. Set Language Preference
 ```bash
 curl -X POST "http://localhost:8000/preferences/language" \
      -H "Content-Type: application/json" \
      -d '{"user_id": "farmer123", "language": "hi"}'
 ```
 
-### 2. Get Today's Action Cards (Hindi)
+### 3. Get Today's Action Cards (Hindi)
 ```bash
 curl -X POST "http://localhost:8000/today" \
      -H "Content-Type: application/json" \

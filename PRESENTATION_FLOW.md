@@ -29,9 +29,10 @@ This document provides a slide-by-slide flow for a formal presentation of the Kh
 *   **Key Question**: What does KhetiPulse actually do?
 *   **Content**:
     1.  **AI Advisor (RAG Chat)**: 24/7 expert advice based on verified agricultural knowledge.
-    2.  **Smart Mandi Insights**: Live price tracking and predictive selling recommendations.
+    2.  **Smart Mandi Insights**: Live price tracking and resilient multi-level selling recommendations (District → State → Crop).
     3.  **Weather Pulse**: Hyper-local, farm-specific alerts and action plans.
     4.  **Scheme Discovery**: Instant matching with government subsidies and grants.
+    5.  **Onboarding Metadata**: Centralized API for consistent state, district, and crop selection across the platform.
 
 ### **Slide 5: Why is AI Important Here? (The Intelligence)**
 *   **Key Question**: Why not just a regular app?

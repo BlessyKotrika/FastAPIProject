@@ -61,8 +61,8 @@ To provide a **single pane of glass** for a farmer's daily operations. Instead o
 Because a 10% increase in a farmer's income or a 10% reduction in crop loss due to early weather warnings can be the difference between debt and prosperity. It's about **economic resilience**.
 
 ### **What are the unique features?**
-1.  **Contextual Onboarding**: The app "learns" about the farmer's land once and remembers it forever.
-2.  **Smart Selling**: It doesn't just show prices; it suggests *where* to sell for the best profit.
+1.  **Contextual Onboarding**: The app "learns" about the farmer's land once and remembers it forever with a centralized metadata API for consistent state/district/crop data.
+2.  **Smart Selling**: It doesn't just show prices; it suggests *where* to sell for the best profit using a resilient multi-level fallback mechanism (District → State → Crop) to ensure data is always available.
 3.  **Safety-First AI**: Using RAG (Retrieval-Augmented Generation) ensures the advice given is based on verified agricultural data, not random LLM predictions.
 
 ### **Why is AI important here?**
