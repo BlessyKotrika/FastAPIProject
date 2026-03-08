@@ -73,11 +73,12 @@ export default function MandiPage() {
     fetchMandi();
   }, [selectedCrop, profile.location, profile.district, profile.state, profile.language]);
 
-  const fetchMandi = async () => {
-    const effectiveLocation = profile.location || profile.district || "";
+  const fetchMandi = async (locationOverride?: string, cropOverride?: string) => {
+    const effectiveLocation = (locationOverride || selectedLocation || profile.location || profile.district || 'Barabanki').trim();
+    const effectiveCrop = (cropOverride || selectedCrop || profile.crop || 'Wheat').trim();
     const effectiveLanguage = profile.language || "hi";
 
-    if (!selectedCrop || !effectiveLocation) {
+    if (!effectiveCrop || !effectiveLocation) {
       setLoading(false);
       setData({
         best_mandi: "Data not available for the selected crop.",
@@ -89,11 +90,6 @@ export default function MandiPage() {
       });
       return;
     }
-  }, [calculatorMarkets, allMarkets]);
-
-  const fetchMandi = async (locationOverride?: string, cropOverride?: string) => {
-    const locationToUse = (locationOverride || selectedLocation || profile.location || 'Barabanki').trim();
-    const cropToUse = (cropOverride || selectedCrop || profile.crop || 'Wheat').trim();
 
     try {
       setLoading(true);
@@ -101,7 +97,7 @@ export default function MandiPage() {
 
       // Main insights are based on location search (+ optional profile.state)
       const res = await sellSmartService.getMandiData({
-        crop: selectedCrop,
+        crop: effectiveCrop,
         location: effectiveLocation,
         state: profile.state || "",
         language: effectiveLanguage,
