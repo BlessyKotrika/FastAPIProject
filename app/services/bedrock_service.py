@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class BedrockService:
-    def __init__(self):
-        self.client = boto3.client(
+    def __init__(self, bedrock_runtime_client=None, bedrock_agent_runtime_client=None):
+        self.client = bedrock_runtime_client or boto3.client(
             service_name="bedrock-runtime",
             region_name=settings.AWS_REGION
         )
-        self.kb_client = boto3.client(
+        self.kb_client = bedrock_agent_runtime_client or boto3.client(
             service_name="bedrock-agent-runtime",
             region_name=settings.AWS_REGION
         )

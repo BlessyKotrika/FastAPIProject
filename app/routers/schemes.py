@@ -3,6 +3,7 @@ from app.models.request_models import SchemeRequest
 from app.models.response_models import SchemeResponse
 from app.services.rag_service import RAGService
 from app.dependencies import get_rag_service
+from app.utils.exceptions import KhetiPulseException
 
 router = APIRouter()
 
@@ -65,7 +66,7 @@ async def get_schemes(request: SchemeRequest, rag_service: RAGService = Depends(
             documents_required=list(set([doc for s in schemes for doc in s["documents"]])),
             application_links=[s["link"] for s in schemes]
         )
+    except KhetiPulseException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(status_code=500, detail=str(e))

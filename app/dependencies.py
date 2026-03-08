@@ -1,4 +1,5 @@
 import boto3
+from fastapi import Depends
 from app.config import settings
 
 def get_db_client():
@@ -12,36 +13,39 @@ def get_advisory_table():
     db = get_db_client()
     return db.Table(settings.DYNAMODB_TABLE_ADVISORY)
 
+from app.utils.http_client import get_http_client
+
 # Service Dependencies
 from app.services.bedrock_service import BedrockService
 from app.services.rag_service import RAGService
 from app.services.weather_service import WeatherService
 from app.services.mandi_service import MandiService
 from app.services.recommendation_engine import RecommendationEngine
-from app.services.chat_history_service import ChatHistoryService  # NEW
+from app.services.chat_history_service import ChatHistoryService
 
 # Pre-instantiate services (could also be done per-request if needed)
 _bedrock_service = BedrockService()
 _rag_service = RAGService(_bedrock_service)
-_weather_service = WeatherService()
-_mandi_service = MandiService()
-_recommendation_engine = RecommendationEngine(_weather_service, _mandi_service, _bedrock_service)
-_chat_history_service = ChatHistoryService()  # NEW
+_chat_history_service = ChatHistoryService()
 
-def get_bedrock_service() -> BedrockService:
+async def get_bedrock_service() -> BedrockService:
     return _bedrock_service
 
-def get_rag_service() -> RAGService:
+async def get_rag_service() -> RAGService:
     return _rag_service
 
-def get_weather_service() -> WeatherService:
-    return _weather_service
+async def get_weather_service(http_client = Depends(get_http_client)) -> WeatherService:
+    return WeatherService(http_client=http_client)
 
-def get_mandi_service() -> MandiService:
-    return _mandi_service
+async def get_mandi_service(http_client = Depends(get_http_client)) -> MandiService:
+    return MandiService(http_client=http_client)
 
-def get_recommendation_engine() -> RecommendationEngine:
-    return _recommendation_engine
+async def get_recommendation_engine(
+    bedrock: BedrockService = Depends(get_bedrock_service),
+    weather: WeatherService = Depends(get_weather_service),
+    mandi: MandiService = Depends(get_mandi_service)
+) -> RecommendationEngine:
+    return RecommendationEngine(weather, mandi, bedrock)
 
-def get_chat_history_service() -> ChatHistoryService:  # NEW
+async def get_chat_history_service() -> ChatHistoryService:
     return _chat_history_service

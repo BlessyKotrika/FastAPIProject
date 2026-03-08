@@ -4,6 +4,7 @@ from app.models.response_models import SellSmartResponse
 from app.services.mandi_service import MandiService
 from app.dependencies import get_mandi_service
 from app.utils.confidence import calculate_confidence
+from app.utils.exceptions import KhetiPulseException
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ async def sell_smart(request: SellSmartRequest, mandi_service: MandiService = De
             confidence_score=calculate_confidence(data_freshness=0.95),
             all_markets=data
         )
+    except KhetiPulseException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(status_code=500, detail=str(e))
