@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/i18n';
 import Layout from '@/components/Layout';
-import { authService } from '@/services/api';
+import { authService, onboardingService } from '@/services/api';
 import { 
   User, 
   Settings, 
@@ -34,32 +34,28 @@ export default function MorePage() {
     district: profile.district || '',
     state: profile.state || '',
     crops: (profile.crops && profile.crops.length > 0)
-      ? Array.from(new Set(profile.crops.map((c) => getCropCode(c)).filter(Boolean)))
-      : (profile.crop ? [getCropCode(profile.crop)] : []),
+      ? Array.from(new Set(profile.crops.map((c) => getCropCode(c) || String(c || "").trim().toLowerCase()).filter(Boolean)))
+      : (profile.crop ? [getCropCode(profile.crop) || String(profile.crop).trim().toLowerCase()] : []),
     sowing_date: profile.sowing_date || '',
   });
 
   useEffect(() => {
     const loadProfileLov = async () => {
       try {
-        const api = process.env.NEXT_PUBLIC_API_URL;
-        const statesRes = await fetch(`${api}/onboarding/states`);
-        const statesData = await statesRes.json();
+        const statesData = await onboardingService.getStates();
         if (Array.isArray(statesData)) {
           setStates(statesData);
         }
 
-        const res = await fetch(`${api}/onboarding/crops`);
-        const data = await res.json();
+        const data = await onboardingService.getCrops();
         if (Array.isArray(data)) {
-          const normalized = Array.from(new Set(data.map((c: string) => getCropCode(c)).filter(Boolean)));
+          const normalized = Array.from(new Set(data.map((c: string) => getCropCode(c) || String(c).trim().toLowerCase()).filter(Boolean)));
           setCropOptions(normalized);
         }
 
         const selectedState = profile.state || "";
         if (selectedState) {
-          const distRes = await fetch(`${api}/onboarding/districts/${encodeURIComponent(selectedState)}`);
-          const distData = await distRes.json();
+          const distData = await onboardingService.getDistricts(selectedState);
           if (Array.isArray(distData)) {
             setDistricts(distData);
           }
@@ -69,14 +65,12 @@ export default function MorePage() {
       }
     };
     loadProfileLov();
-  }, []);
+  }, [profile.state, profile.language, getCropCode]);
 
   const handleStateChange = async (state: string) => {
     setEditForm({ ...editForm, state, district: "" });
     try {
-      const api = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${api}/onboarding/districts/${encodeURIComponent(state)}`);
-      const data = await res.json();
+      const data = await onboardingService.getDistricts(state);
       setDistricts(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error("Failed to load districts", e);
@@ -137,8 +131,8 @@ export default function MorePage() {
                 district: profile.district || '',
                 state: profile.state || '',
                 crops: (profile.crops && profile.crops.length > 0)
-                  ? Array.from(new Set(profile.crops.map((c) => getCropCode(c)).filter(Boolean)))
-                  : (profile.crop ? [getCropCode(profile.crop)] : []),
+                  ? Array.from(new Set(profile.crops.map((c) => getCropCode(c) || String(c || "").trim().toLowerCase()).filter(Boolean)))
+                  : (profile.crop ? [getCropCode(profile.crop) || String(profile.crop).trim().toLowerCase()] : []),
                 sowing_date: profile.sowing_date || '',
               });
               if (profile.state) {
@@ -353,7 +347,7 @@ export default function MorePage() {
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.cropName')}</label>
                     <div className="max-h-56 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                      {(cropOptions.length > 0 ? cropOptions : ["Wheat", "Paddy", "Cotton", "Maize"]).map((crop) => {
+                      {(cropOptions.length > 0 ? cropOptions : ["wheat", "paddy", "cotton", "maize"]).map((crop) => {
                         const selected = editForm.crops.includes(crop);
                         return (
                           <label

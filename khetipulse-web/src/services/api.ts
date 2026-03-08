@@ -129,4 +129,19 @@ export const preferenceService = {
   },
 };
 
+export const onboardingService = {
+  getStates: async () => {
+    const response = await api.get('/onboarding/states');
+    return response.data;
+  },
+  getDistricts: async (state: string) => {
+    const response = await api.get(`/onboarding/districts/${encodeURIComponent(state)}`);
+    return response.data;
+  },
+  getCrops: async () => {
+    const response = await api.get('/onboarding/crops');
+    return response.data;
+  },
+};
+
 export default api;

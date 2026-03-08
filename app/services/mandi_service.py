@@ -1,5 +1,6 @@
 import boto3
 import logging
+import asyncio
 import httpx
 from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime
@@ -31,10 +32,29 @@ class MandiService:
                 "filters[commodity]": crop
             }
 
-            async def fetch(current_params: Dict[str, Any]) -> List[Dict[str, Any]]:
-                response = await client.get(f"{self.base_url}{self.resource_id}", params=current_params)
-                response.raise_for_status()
-                return response.json().get("records", [])
+            async def fetch(current_params: Dict[str, Any], label: str) -> List[Dict[str, Any]]:
+                attempts = 2
+                for attempt in range(1, attempts + 1):
+                    try:
+                        response = await client.get(
+                            f"{self.base_url}{self.resource_id}",
+                            params=current_params,
+                            timeout=httpx.Timeout(20.0, connect=8.0),
+                        )
+                        response.raise_for_status()
+                        return response.json().get("records", [])
+                    except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.TimeoutException) as exc:
+                        logger.warning(
+                            "Mandi API timeout on %s (attempt %s/%s): %s",
+                            label,
+                            attempt,
+                            attempts,
+                            exc,
+                        )
+                        if attempt < attempts:
+                            await asyncio.sleep(0.35 * attempt)
+                            continue
+                        return []
 
             # Strategy 1: Location + State
             if location:
@@ -42,24 +62,24 @@ class MandiService:
             if state:
                 params["filters[state]"] = state
 
-            records = await fetch(dict(params))
+            records = await fetch(dict(params), "district+state")
 
             # Strategy 2: State only
             if not records and location and state:
                 params.pop("filters[district]", None)
-                records = await fetch(dict(params))
+                records = await fetch(dict(params), "state_only")
 
             # Strategy 3: District only
             if not records and location:
                 params.pop("filters[state]", None)
                 params["filters[district]"] = location
-                records = await fetch(dict(params))
+                records = await fetch(dict(params), "district_only")
 
             # Strategy 4: Crop only (broadest)
             if not records:
                 params.pop("filters[district]", None)
                 params.pop("filters[state]", None)
-                records = await fetch(dict(params))
+                records = await fetch(dict(params), "crop_only")
 
             return self._dedupe_records(records)
         except Exception as e:
