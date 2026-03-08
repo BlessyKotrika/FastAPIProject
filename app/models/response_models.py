@@ -7,6 +7,7 @@ class TodayResponse(BaseModel):
     avoid: List[str] = Field(..., description="List of actions to avoid today")
     prepare: List[str] = Field(..., description="Preparation steps for upcoming days")
     weather_risk: Dict[str, Any] = Field(..., description="Weather risk details")
+    current_weather: Dict[str, Any] = Field(default={}, description="Current weather snapshot")
     confidence_score: float = Field(..., ge=0, le=1)
     sources: List[str] = Field(default=[], description="Information sources")
 
@@ -75,3 +76,12 @@ class UserResponse(BaseModel):
     username: str
     full_name: Optional[str] = None
     mobile_number: Optional[str] = None
+    # profile details
+    language: Optional[str] = None
+    state: Optional[str] = None
+    district: Optional[str] = None
+    location: Optional[str] = None
+    crop: Optional[str] = None
+    crops: Optional[List[str]] = None
+    sowing_date: Optional[str] = None
+    is_onboarded: Optional[bool] = False

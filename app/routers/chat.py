@@ -18,6 +18,7 @@ async def chat(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["id"]
+    account_language = str(current_user.get("language") or request.language or "hi")
 
     # 1) Resolve or create conversation
     if request.conversation_id:
@@ -29,7 +30,7 @@ async def chat(
         chat_history_service.upsert_conversation_metadata(
             conversation_id=request.conversation_id,
             user_id=user_id,
-            language=str(request.language) if request.language else None,
+            language=account_language,
             crop=request.crop,
             location=request.location
         )
@@ -37,7 +38,7 @@ async def chat(
     else:
         conversation = chat_history_service.create_conversation(
             user_id=user_id,
-            language=str(request.language),
+            language=account_language,
             crop=request.crop,
             location=request.location
         )
@@ -53,7 +54,7 @@ async def chat(
     # 3) Persist user message
     user_message_payload = {
         "question": request.question,
-        "language": str(request.language),
+        "language": account_language,
         "crop": request.crop,
         "location": request.location
     }
@@ -68,7 +69,7 @@ async def chat(
     # 4) Generate response from RAG with history + summary
     rag_response = rag_service.answer_question(
         question=request.question,
-        language=str(request.language),
+        language=account_language,
         crop=request.crop,
         location=request.location,
         history=history,

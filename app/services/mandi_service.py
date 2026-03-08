@@ -57,17 +57,7 @@ class MandiService:
                 return records
         except Exception as e:
             print(f"Error fetching mandi data from API: {e}")
-            # Fallback to mock data if API fails
-            mock_records = [
-                {
-                    "Market": "Barabanki",
-                    "Commodity": "Wheat",
-                    "Modal_Price": "2450",
-                    "District": "Barabanki",
-                    "Arrival_Date": "01/11/2025"
-                }
-            ]
-            return mock_records
+            return []
 
     def compute_trends(self, data):
         """Computes 7-day and 30-day trends."""
@@ -81,7 +71,8 @@ class MandiService:
             return "No data available", 0
         
         # 1. First, try to find an exact match for the user's district
-        district_matches = [r for r in data if r.get('District', '').lower() == location.lower()]
+        normalized_location = (location or "").lower()
+        district_matches = [r for r in data if r.get('District', '').lower() == normalized_location]
         
         # 2. If we have district matches, pick the one with the best price among them
         if district_matches:

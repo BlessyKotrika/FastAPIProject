@@ -11,10 +11,12 @@ class RecommendationEngine:
 
     def generate_today_actions(self, crop: str, stage: str, weather_data: Dict[str, Any], language: str):
         """Generates actionable advice based on crop stage and weather."""
-        
+        weather_list = weather_data.get('list', []) or []
+        first_slot = weather_list[0] if weather_list else {}
+
         # Simple rule-based preprocessing for weather risks
-        rain_risk = any("Rain" in w['weather'][0]['main'] for w in weather_data.get('list', []))
-        wind_risk = any(w['wind']['speed'] > 10 for w in weather_data.get('list', []))
+        rain_risk = any("Rain" in (w.get('weather', [{}])[0].get('main', '')) for w in weather_list)
+        wind_risk = any((w.get('wind', {}).get('speed', 0) or 0) > 10 for w in weather_list)
         
         weather_summary = f"Weather: {'Rain' if rain_risk else 'Dry'}, {'High Wind' if wind_risk else 'Low Wind'}."
         
@@ -40,6 +42,14 @@ class RecommendationEngine:
             "rain_forecast": rain_risk,
             "high_wind": wind_risk,
             "source": "OpenWeatherMap"
+        }
+        response_json["current_weather"] = {
+            "temp": (first_slot.get("main", {}) or {}).get("temp"),
+            "humidity": (first_slot.get("main", {}) or {}).get("humidity"),
+            "wind_speed": (first_slot.get("wind", {}) or {}).get("speed"),
+            "condition": ((first_slot.get("weather", [{}]) or [{}])[0] or {}).get("main"),
+            "description": ((first_slot.get("weather", [{}]) or [{}])[0] or {}).get("description"),
+            "timestamp": first_slot.get("dt_txt"),
         }
         response_json["confidence_score"] = calculate_confidence(weather_certainty=0.9 if rain_risk else 0.8)
         response_json["sources"] = ["Regional Advisory Bulletin"]

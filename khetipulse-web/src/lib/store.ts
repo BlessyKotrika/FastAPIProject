@@ -7,6 +7,7 @@ interface UserProfile {
   mobile_number: string;
   language: string;
   crop: string;
+  crops: string[];
   location: string;
   sowing_date: string;
   state: string;
@@ -35,6 +36,7 @@ const initialProfile: UserProfile = {
   mobile_number: '',
   language: 'hi',
   crop: '',
+  crops: [],
   location: '',
   sowing_date: '',
   state: '',

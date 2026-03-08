@@ -380,6 +380,8 @@ Recent conversation:
         advisory_mode: str = "llm"
     ) -> Dict[str, Any]:
         # 1) Safety
+        safe = is_query_safe(question)
+        print(f"Checking query safety for: {question} --> {safe}")
         if not is_query_safe(question):
             return {
                 "message_type": "refusal",
@@ -401,6 +403,7 @@ Recent conversation:
             advisory_mode = "llm"
 
         use_rag = advisory_mode == "schemes"
+        print(use_rag, advisory_mode)
         history_text = self._format_history(history)
 
         # ------------------------------------------------------
@@ -616,7 +619,7 @@ Current question:
             system_prompt = f"""
 You are KhetiPulse AI.
 Language: {language}
-Use ONLY provided context.
+Use provided context first. If insufficient, use knowledge of Indian government schemes.
 Return ONLY valid JSON (no markdown).
 
 For scheme queries return ONLY keys:

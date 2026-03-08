@@ -68,16 +68,28 @@ export default function LoginPage() {
     // Update store with token
     setAuth({ token: token, isAuthenticated: true });
 
-    // Fetch user profile from /me
+    // Fetch user profile from backend
     const user = await authService.getMe();
-    setProfile({
+    const crops: string[] = Array.isArray(user.crops)
+      ? user.crops
+      : (user.crop ? [user.crop] : []);
+    const profileData = {
       user_id: user.username,
       full_name: user.full_name,
       mobile_number: user.mobile_number || '',
-    });
+      language: user.language || 'hi',
+      state: user.state || '',
+      district: user.district || '',
+      location: user.location || user.district || '',
+      crop: user.crop || crops[0] || '',
+      crops,
+      sowing_date: user.sowing_date || '',
+      is_onboarded: user.is_onboarded || false,
+    };
+    setProfile(profileData);
 
-    // Redirect to home/onboarding
-    router.push('/');
+    // Decide where to send user
+    router.replace('/');
   };
 
   return (
