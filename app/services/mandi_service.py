@@ -33,16 +33,28 @@ class MandiService:
             }
 
             async def fetch(current_params: Dict[str, Any], label: str) -> List[Dict[str, Any]]:
-                attempts = 2
+                attempts = 3  # Increased attempts
                 for attempt in range(1, attempts + 1):
                     try:
+                        url = f"{self.base_url}{self.resource_id}"
+                        logger.info("Mandi API Request [%s]: %s | Params: %s", label, url, current_params)
+                        
                         response = await client.get(
-                            f"{self.base_url}{self.resource_id}",
+                            url,
                             params=current_params,
-                            timeout=httpx.Timeout(20.0, connect=8.0),
+                            timeout=httpx.Timeout(20.0, connect=10.0),
                         )
-                        response.raise_for_status()
-                        return response.json().get("records", [])
+                        
+                        if response.status_code != 200:
+                            logger.error("Mandi API Error [%s]: Status %s | Response: %s", 
+                                         label, response.status_code, response.text[:200])
+                            response.raise_for_status()
+                            
+                        data = response.json()
+                        records = data.get("records", [])
+                        logger.info("Mandi API Success [%s]: Found %s records", label, len(records))
+                        return records
+                        
                     except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.TimeoutException) as exc:
                         logger.warning(
                             "Mandi API timeout on %s (attempt %s/%s): %s",
@@ -52,8 +64,11 @@ class MandiService:
                             exc,
                         )
                         if attempt < attempts:
-                            await asyncio.sleep(0.35 * attempt)
+                            await asyncio.sleep(0.5 * attempt)
                             continue
+                        return []
+                    except Exception as exc:
+                        logger.error("Unexpected error in Mandi API fetch [%s]: %s", label, exc)
                         return []
 
             # Strategy 1: Location + State
