@@ -23,6 +23,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function MorePage() {
   const { profile, setProfile, logout } = useAppStore();
   const { t, tCrop, getCropCode } = useTranslation();
+  const [states, setStates] = useState<string[]>([]);
+  const [districts, setDistricts] = useState<string[]>([]);
   const [cropOptions, setCropOptions] = useState<string[]>([]);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -38,21 +40,49 @@ export default function MorePage() {
   });
 
   useEffect(() => {
-    const loadCropOptions = async () => {
+    const loadProfileLov = async () => {
       try {
         const api = process.env.NEXT_PUBLIC_API_URL;
+        const statesRes = await fetch(`${api}/onboarding/states`);
+        const statesData = await statesRes.json();
+        if (Array.isArray(statesData)) {
+          setStates(statesData);
+        }
+
         const res = await fetch(`${api}/onboarding/crops`);
         const data = await res.json();
         if (Array.isArray(data)) {
           const normalized = Array.from(new Set(data.map((c: string) => getCropCode(c)).filter(Boolean)));
           setCropOptions(normalized);
         }
+
+        const selectedState = profile.state || "";
+        if (selectedState) {
+          const distRes = await fetch(`${api}/onboarding/districts/${encodeURIComponent(selectedState)}`);
+          const distData = await distRes.json();
+          if (Array.isArray(distData)) {
+            setDistricts(distData);
+          }
+        }
       } catch (e) {
-        console.error("Failed to load crop list", e);
+        console.error("Failed to load profile LOV", e);
       }
     };
-    loadCropOptions();
+    loadProfileLov();
   }, []);
+
+  const handleStateChange = async (state: string) => {
+    setEditForm({ ...editForm, state, district: "" });
+    try {
+      const api = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${api}/onboarding/districts/${encodeURIComponent(state)}`);
+      const data = await res.json();
+      setDistricts(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Failed to load districts", e);
+      setDistricts([]);
+    }
+  };
 
   const handleEditSave = async () => {
     const payload = {
@@ -111,6 +141,9 @@ export default function MorePage() {
                   : (profile.crop ? [getCropCode(profile.crop)] : []),
                 sowing_date: profile.sowing_date || '',
               });
+              if (profile.state) {
+                handleStateChange(profile.state);
+              }
               setShowEditModal(true);
             }}
             className="absolute top-6 right-6 p-2 bg-primary-50 text-primary-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
@@ -287,21 +320,34 @@ export default function MorePage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.state')}</label>
-                      <input 
-                        type="text"
+                      <select
                         className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
                         value={editForm.state}
-                        onChange={(e) => setEditForm({...editForm, state: e.target.value})}
-                      />
+                        onChange={(e) => handleStateChange(e.target.value)}
+                      >
+                        <option value="">{t("onboarding.state")}</option>
+                        {states.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.district')}</label>
-                      <input 
-                        type="text"
+                      <select
                         className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800"
                         value={editForm.district}
                         onChange={(e) => setEditForm({...editForm, district: e.target.value})}
-                      />
+                        disabled={!editForm.state}
+                      >
+                        <option value="">{t("onboarding.district")}</option>
+                        {districts.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   <div className="space-y-1">
