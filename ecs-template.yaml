@@ -292,6 +292,15 @@ Resources:
                 Action:
                   - translate:TranslateText
                 Resource: '*'
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                Resource: "*"
 
   LogGroup:
     Type: AWS::Logs::LogGroup
