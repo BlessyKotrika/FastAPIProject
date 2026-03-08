@@ -2,18 +2,17 @@
 
 KhetiPulse is a comprehensive, multilingual platform designed to assist Indian farmers with real-time weather-based advice, market insights, and AI-powered agricultural consulting.
 
-## 🚀 Quick Start Guide
+## 📚 Project Documentation & Guides
 
-**For local development:**
-👉 **[LOCAL_SETUP_GUIDE.md](./LOCAL_SETUP_GUIDE.md)**
+For in-depth information on the project, please refer to the following guides:
 
-**For AWS ECS deployment with CI/CD:**
-👉 **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)**
-
-**For legacy AWS Lambda deployment:**
-👉 **[FULL_RUN_GUIDE.md](./FULL_RUN_GUIDE.md)**
-
----
+*   **[PRESENTATION_FLOW.md](./PRESENTATION_FLOW.md)**: 📽️ **Slide-by-slide presentation flow and script.**
+*   **[PRESENTATION_GUIDE.md](./PRESENTATION_GUIDE.md)**: 🎯 **Final Presentation Content, Purpose, and Features.**
+*   **[LOCAL_SETUP_GUIDE.md](./LOCAL_SETUP_GUIDE.md)**: 💻 Local development and execution.
+*   **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)**: ☁️ Production deployment on AWS ECS.
+*   **[AWS_CONFIGURATION_GUIDE.md](./AWS_CONFIGURATION_GUIDE.md)**: ⚙️ Configuring AWS services and environment variables.
+*   **[FULL_RUN_GUIDE.md](./FULL_RUN_GUIDE.md)**: 🚀 Comprehensive end-to-step execution guide.
+*   **[openapi.json](./openapi.json)**: 📖 Latest OpenAPI specification for the backend.
 
 ## 🌍 Multilingual & AI Features
 KhetiPulse supports: **English (en), Hindi (hi), Telugu (te), Tamil (ta), and Bengali (bn)**.
