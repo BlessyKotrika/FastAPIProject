@@ -6,7 +6,15 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
+const getApiErrorMessage = (error: any, fallback = 'Something went wrong') => {
+  const detail = error?.response?.data?.detail;
+  const message = error?.response?.data?.message;
+  const statusText = error?.response?.statusText;
+  return detail || message || statusText || error?.message || fallback;
+};
+export const apiError = {
+  message: getApiErrorMessage,
+};
 // Add a request interceptor to include the auth token
 api.interceptors.request.use((config) => {
   const token = useAppStore.getState().auth.token;
@@ -90,8 +98,12 @@ export const sellSmartService = {
     state: string;
     language: string;
   }) => {
-    const response = await api.post('/sell-smart/', data);
-    return response.data;
+    try {
+      const response = await api.post('/sell-smart/', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(getApiErrorMessage(error, "Couldn’t fetch live mandi prices. Please refresh."));
+    }
   },
 };
 
