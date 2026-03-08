@@ -70,24 +70,24 @@ export default function MandiPage() {
   }, [allMarkets, calcState]);
 
   useEffect(() => {
-    const initialLocation = profile.location || 'Barabanki';
-    const initialCrop = profile.crop || "Wheat";
-    setSearchInput(initialLocation);
-    setSelectedLocation(initialLocation);
-    setSelectedCrop(initialCrop);
-    setCalcState(profile.state || "");
-    fetchMandi(initialLocation, initialCrop);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.language]);
+    fetchMandi();
+  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language]);
 
-  useEffect(() => {
-    const source = calculatorMarkets.length > 0 ? calculatorMarkets : allMarkets;
-    if (source.length > 0) {
-      const first = source[0];
-      const key = `${first?.Market || first?.name || "Unknown"}|${first?.District || first?.dist || ""}`;
-      setSelectedMarketKey(key);
-    } else {
-      setSelectedMarketKey("");
+  const fetchMandi = async () => {
+    const effectiveLocation = profile.location || profile.district || "";
+    const effectiveLanguage = profile.language || "hi";
+
+    if (!selectedCrop || !effectiveLocation) {
+      setLoading(false);
+      setData({
+        best_mandi: "Data not available for the selected crop.",
+        net_price: 0,
+        trend_7d: "N/A",
+        forecast_band: "N/A",
+        confidence_score: 0,
+        all_markets: [],
+      });
+      return;
     }
   }, [calculatorMarkets, allMarkets]);
 
@@ -101,10 +101,10 @@ export default function MandiPage() {
 
       // Main insights are based on location search (+ optional profile.state)
       const res = await sellSmartService.getMandiData({
-        crop: cropToUse,
-        location: locationToUse,
-        state: profile.state || '',
-        language: profile.language,
+        crop: selectedCrop,
+        location: effectiveLocation,
+        state: profile.state || "",
+        language: effectiveLanguage,
       });
 
       setData(res);
