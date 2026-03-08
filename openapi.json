@@ -1,1 +1,1092 @@
-{"openapi":"3.1.0","info":{"title":"KhetiPulse Backend","description":"AI-powered multilingual farmer decision support system","version":"1.0.0"},"paths":{"/preferences/language":{"post":{"tags":["User Preferences"],"summary":"Update Language","operationId":"update_language_preferences_language_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/LanguagePreferenceRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/preferences/{user_id}/language":{"get":{"tags":["User Preferences"],"summary":"Get Language","operationId":"get_language_preferences__user_id__language_get","parameters":[{"name":"user_id","in":"path","required":true,"schema":{"type":"string","title":"User Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/today/":{"post":{"tags":["Today Actions"],"summary":"Get Today Actions","operationId":"get_today_actions_today__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TodayRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TodayResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/sell-smart/":{"post":{"tags":["Sell Smart"],"summary":"Sell Smart","operationId":"sell_smart_sell_smart__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SellSmartRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/SellSmartResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/chat/":{"post":{"tags":["Ask KhetiPulse"],"summary":"Chat","operationId":"chat_chat__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ChatRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ChatResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/schemes/":{"post":{"tags":["Schemes"],"summary":"Get Schemes","operationId":"get_schemes_schemes__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SchemeRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/SchemeResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/":{"get":{"summary":"Health Check","operationId":"health_check__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}}},"components":{"schemas":{"ChatRequest":{"properties":{"question":{"type":"string","title":"Question"},"language":{"type":"string","title":"Language","default":"hi"},"crop":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Crop"},"location":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Location"}},"type":"object","required":["question"],"title":"ChatRequest"},"ChatResponse":{"properties":{"answer":{"type":"string","title":"Answer"},"confidence_score":{"type":"number","title":"Confidence Score"},"citations":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"title":"Citations","default":[]}},"type":"object","required":["answer","confidence_score"],"title":"ChatResponse"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"LanguagePreferenceRequest":{"properties":{"user_id":{"type":"string","title":"User Id"},"language":{"type":"string","title":"Language","description":"Preferred language: hi, en, te, ta, bn"}},"type":"object","required":["user_id","language"],"title":"LanguagePreferenceRequest"},"SchemeRequest":{"properties":{"state":{"type":"string","title":"State"},"land_size":{"type":"number","title":"Land Size"},"category":{"type":"string","title":"Category"},"crop":{"type":"string","title":"Crop"},"language":{"type":"string","title":"Language","default":"hi"}},"type":"object","required":["state","land_size","category","crop"],"title":"SchemeRequest"},"SchemeResponse":{"properties":{"eligible_schemes":{"items":{"type":"string"},"type":"array","title":"Eligible Schemes"},"documents_required":{"items":{"type":"string"},"type":"array","title":"Documents Required"},"application_links":{"items":{"type":"string"},"type":"array","title":"Application Links"}},"type":"object","required":["eligible_schemes","documents_required","application_links"],"title":"SchemeResponse"},"SellSmartRequest":{"properties":{"crop":{"type":"string","title":"Crop"},"location":{"type":"string","title":"Location"},"language":{"type":"string","title":"Language","default":"hi"}},"type":"object","required":["crop","location"],"title":"SellSmartRequest"},"SellSmartResponse":{"properties":{"best_mandi":{"type":"string","title":"Best Mandi"},"net_price":{"type":"number","title":"Net Price"},"trend_7d":{"type":"string","title":"Trend 7D"},"forecast_band":{"type":"string","title":"Forecast Band"},"confidence_score":{"type":"number","title":"Confidence Score"}},"type":"object","required":["best_mandi","net_price","trend_7d","forecast_band","confidence_score"],"title":"SellSmartResponse"},"TodayRequest":{"properties":{"user_id":{"type":"string","title":"User Id"},"crop":{"type":"string","title":"Crop"},"location":{"type":"string","title":"Location"},"language":{"type":"string","title":"Language","default":"hi"},"sowing_date":{"type":"string","title":"Sowing Date"}},"type":"object","required":["user_id","crop","location","sowing_date"],"title":"TodayRequest"},"TodayResponse":{"properties":{"do":{"items":{"type":"string"},"type":"array","title":"Do"},"avoid":{"items":{"type":"string"},"type":"array","title":"Avoid"},"prepare":{"items":{"type":"string"},"type":"array","title":"Prepare"},"weather_risk":{"additionalProperties":true,"type":"object","title":"Weather Risk"},"confidence_score":{"type":"number","title":"Confidence Score"},"sources":{"items":{"type":"string"},"type":"array","title":"Sources","default":[]}},"type":"object","required":["do","avoid","prepare","weather_risk","confidence_score"],"title":"TodayResponse"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"},"input":{"title":"Input"},"ctx":{"type":"object","title":"Context"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "KhetiPulse Backend",
+    "description": "AI-powered multilingual farmer decision support system",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register",
+        "operationId": "register_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "operationId": "login_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Read Users Me",
+        "operationId": "read_users_me_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/preferences/language": {
+      "post": {
+        "tags": [
+          "User Preferences"
+        ],
+        "summary": "Update Language",
+        "operationId": "update_language_preferences_language_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanguagePreferenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/preferences/{user_id}/language": {
+      "get": {
+        "tags": [
+          "User Preferences"
+        ],
+        "summary": "Get Language",
+        "operationId": "get_language_preferences__user_id__language_get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/today/": {
+      "post": {
+        "tags": [
+          "Today Actions"
+        ],
+        "summary": "Get Today Actions",
+        "operationId": "get_today_actions_today__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sell-smart/": {
+      "post": {
+        "tags": [
+          "Sell Smart"
+        ],
+        "summary": "Sell Smart",
+        "operationId": "sell_smart_sell_smart__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellSmartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellSmartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/": {
+      "post": {
+        "tags": [
+          "Ask KhetiPulse"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_chat__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/schemes/": {
+      "post": {
+        "tags": [
+          "Schemes"
+        ],
+        "summary": "Get Schemes",
+        "operationId": "get_schemes_schemes__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchemeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatMessageType": {
+        "type": "string",
+        "enum": [
+          "advice",
+          "schemes",
+          "refusal",
+          "fallback"
+        ],
+        "title": "ChatMessageType"
+      },
+      "ChatRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Question",
+            "example": "When should I harvest my wheat?"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "hi"
+          },
+          "crop": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop",
+            "example": "Wheat"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "example": "Barabanki"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id",
+            "description": "Existing conversation id for multi-turn chat",
+            "example": "conv_1f8f0f3a"
+          },
+          "client_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Message Id",
+            "description": "Client-generated idempotency key for this user message",
+            "example": "msg_client_123"
+          },
+          "advisory_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advisory Mode",
+            "description": "llm or schemes",
+            "default": "llm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "Conversation id for continuing chat"
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "description": "Assistant message id"
+          },
+          "message_type": {
+            "$ref": "#/components/schemas/ChatMessageType",
+            "description": "Type of assistant response"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer",
+            "description": "AI generated answer to the question"
+          },
+          "confidence_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence Score"
+          },
+          "citations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Citations",
+            "description": "Source document links"
+          },
+          "checklist": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checklist",
+            "description": "3-step checklist"
+          },
+          "do": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Do",
+            "description": "Recommended actions"
+          },
+          "dont": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Dont",
+            "description": "Actions to avoid"
+          },
+          "schemes": {
+            "items": {
+              "$ref": "#/components/schemas/SchemeItem"
+            },
+            "type": "array",
+            "title": "Schemes",
+            "description": "Eligible schemes with details"
+          },
+          "eligible_schemes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Eligible Schemes",
+            "description": "Legacy list of scheme names"
+          },
+          "documents_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Documents Required",
+            "description": "Legacy/global required documents"
+          },
+          "application_links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Application Links",
+            "description": "Legacy/global application links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "message_id",
+          "message_type",
+          "answer",
+          "confidence_score"
+        ],
+        "title": "ChatResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "hi",
+          "en",
+          "te",
+          "ta",
+          "bn"
+        ],
+        "title": "Language"
+      },
+      "LanguagePreferenceRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "example": "user_123"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "description": "Preferred language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "language"
+        ],
+        "title": "LanguagePreferenceRequest"
+      },
+      "SchemeItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the government scheme"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Brief description of the scheme"
+          },
+          "documents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Documents",
+            "description": "Required documents for this specific scheme"
+          },
+          "link": {
+            "type": "string",
+            "title": "Link",
+            "description": "Application link for this specific scheme"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "documents",
+          "link"
+        ],
+        "title": "SchemeItem"
+      },
+      "SchemeRequest": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "title": "State",
+            "example": "Uttar Pradesh"
+          },
+          "land_size": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Land Size",
+            "example": 2.5
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "example": "Small"
+          },
+          "crop": {
+            "type": "string",
+            "title": "Crop",
+            "example": "Wheat"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "hi"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state",
+          "land_size",
+          "category",
+          "crop"
+        ],
+        "title": "SchemeRequest"
+      },
+      "SchemeResponse": {
+        "properties": {
+          "schemes": {
+            "items": {
+              "$ref": "#/components/schemas/SchemeItem"
+            },
+            "type": "array",
+            "title": "Schemes",
+            "description": "List of eligible government schemes with their details"
+          },
+          "eligible_schemes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Eligible Schemes",
+            "description": "List of eligible government scheme names",
+            "default": []
+          },
+          "documents_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Documents Required",
+            "description": "Global required documents (optional)",
+            "default": []
+          },
+          "application_links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Application Links",
+            "description": "Global application links (optional)",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "schemes"
+        ],
+        "title": "SchemeResponse"
+      },
+      "SellSmartRequest": {
+        "properties": {
+          "crop": {
+            "type": "string",
+            "title": "Crop",
+            "example": "Wheat"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "example": "Barabanki"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "example": "Uttar Pradesh"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "hi"
+          }
+        },
+        "type": "object",
+        "required": [
+          "crop",
+          "location"
+        ],
+        "title": "SellSmartRequest"
+      },
+      "SellSmartResponse": {
+        "properties": {
+          "best_mandi": {
+            "type": "string",
+            "title": "Best Mandi",
+            "description": "Name of the best market to sell"
+          },
+          "net_price": {
+            "type": "number",
+            "title": "Net Price",
+            "description": "Expected net price per unit"
+          },
+          "trend_7d": {
+            "type": "string",
+            "title": "Trend 7D",
+            "description": "7-day price trend"
+          },
+          "forecast_band": {
+            "type": "string",
+            "title": "Forecast Band",
+            "description": "Forecasted price range"
+          },
+          "confidence_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence Score"
+          },
+          "all_markets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "All Markets",
+            "description": "List of all available markets",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "best_mandi",
+          "net_price",
+          "trend_7d",
+          "forecast_band",
+          "confidence_score"
+        ],
+        "title": "SellSmartResponse"
+      },
+      "TodayRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "example": "user_123"
+          },
+          "crop": {
+            "type": "string",
+            "title": "Crop",
+            "example": "Wheat"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "example": "Barabanki"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "hi"
+          },
+          "sowing_date": {
+            "type": "string",
+            "title": "Sowing Date",
+            "example": "2024-10-15"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "crop",
+          "location",
+          "sowing_date"
+        ],
+        "title": "TodayRequest"
+      },
+      "TodayResponse": {
+        "properties": {
+          "do": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Do",
+            "description": "List of recommended actions for today"
+          },
+          "avoid": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Avoid",
+            "description": "List of actions to avoid today"
+          },
+          "prepare": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prepare",
+            "description": "Preparation steps for upcoming days"
+          },
+          "weather_risk": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Weather Risk",
+            "description": "Weather risk details"
+          },
+          "confidence_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence Score"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources",
+            "description": "Information sources",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "do",
+          "avoid",
+          "prepare",
+          "weather_risk",
+          "confidence_score"
+        ],
+        "title": "TodayResponse"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserLoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "example": "farmer_john"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "example": "secure_password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "UserLoginRequest"
+      },
+      "UserRegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "example": "farmer_john"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Password",
+            "example": "secure_password"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name",
+            "example": "John Doe"
+          },
+          "mobile_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile Number",
+            "example": "9876543210"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "UserRegisterRequest"
+      },
+      "UserResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "mobile_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "username"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "auth/login"
+          }
+        }
+      }
+    }
+  }
+}

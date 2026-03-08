@@ -82,7 +82,7 @@ async def get_schemes(
             documents_required=list(set([doc for s in schemes for doc in s["documents"]])),
             application_links=[s["link"] for s in schemes]
         )
+    except KhetiPulseException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(status_code=500, detail=str(e))

@@ -2,16 +2,19 @@ import httpx
 import asyncio
 import time
 from app.config import settings
+from app.utils.exceptions import ExternalServiceError
+
+logger = logging.getLogger(__name__)
 
 class WeatherService:
-    def __init__(self, api_key: str = settings.OPENWEATHER_API_KEY):
+    def __init__(self, http_client: Optional[httpx.AsyncClient] = None, api_key: str = settings.OPENWEATHER_API_KEY):
         self.api_key = api_key
         self.base_url = "https://api.openweathermap.org/data/2.5/forecast"
         self.cache_ttl_seconds = 120
         self._cache = {}
         self._inflight = {}
 
-    async def get_forecast(self, location: str):
+    async def get_forecast(self, location: str) -> Dict[str, Any]:
         """Fetches 48-hour weather forecast."""
         location_key = (location or "").strip().lower()
         cache_key = f"forecast:{location_key}:metric:16"

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KhetiPulse Architecture Diagram</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary-color: #2c3e50;
+            --secondary-color: #27ae60;
+            --accent-color: #2980b9;
+            --aws-color: #ff9900;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            max-width: 600px;
+        }
+
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .layer {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .layer-label {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .component {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            z-index: 2;
+        }
+
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+
+        .component h3 {
+            margin-top: 0;
+            font-size: 1.1em;
+            color: var(--primary-color);
+        }
+
+        .component p {
+            font-size: 0.85em;
+            margin-bottom: 0;
+            color: #777;
+        }
+
+        .tech-tag {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.75em;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Connecting Arrows (Simplified) */
+        .arrow-v {
+            position: absolute;
+            width: 2px;
+            background-color: var(--border-color);
+            height: 50px;
+            left: 50%;
+            margin-left: -1px;
+            z-index: 1;
+        }
+
+        .aws-component {
+            border-left: 4px solid var(--aws-color);
+        }
+
+        .frontend { border-top: 4px solid var(--accent-color); }
+        .backend { border-top: 4px solid var(--secondary-color); }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>KhetiPulse Architecture</h1>
+        <p>Production-ready AI Decision Support System for Indian Farmers</p>
+    </div>
+
+    <div class="diagram-container">
+        
+        <!-- Presentation Layer -->
+        <div class="layer">
+            <div class="layer-label">Presentation Layer</div>
+            <div class="component frontend">
+                <h3>Frontend</h3>
+                <p>Web Dashboard & Onboarding</p>
+                <div class="tech-tag">Next.js 14 / Tailwind</div>
+            </div>
+            <div class="component frontend">
+                <h3>Mobile UI</h3>
+                <p>Responsive Interface</p>
+                <div class="tech-tag">React / Framer Motion</div>
+            </div>
+        </div>
+
+        <!-- Logic Layer -->
+        <div class="layer">
+            <div class="layer-label">Logic Layer</div>
+            <div class="component backend">
+                <h3>FastAPI Server</h3>
+                <p>Core API & Auth</p>
+                <div class="tech-tag">Routers: /auth, /preferences, /today, /sell-smart, /chat, /schemes</div>
+            </div>
+            <div class="component backend">
+                <h3>RAG Engine</h3>
+                <p>Contextual AI Advisory</p>
+                <div class="tech-tag">Bedrock / RAG Service</div>
+            </div>
+            <div class="component backend">
+                <h3>Domain Services</h3>
+                <p>Weather & Mandi Insights</p>
+                <div class="tech-tag">Service Layer</div>
+            </div>
+        </div>
+
+        <!-- Infrastructure & Data Layer -->
+        <div class="layer">
+            <div class="layer-label">Data & Infrastructure (AWS)</div>
+            <div class="component aws-component">
+                <h3>AWS Bedrock</h3>
+                <p>Claude 3 / RAG KB</p>
+                <div class="tech-tag">AI / LLM</div>
+            </div>
+            <div class="component aws-component">
+                <h3>Databases</h3>
+                <p>DynamoDB & SQLite</p>
+                <div class="tech-tag">NoSQL / SQL</div>
+            </div>
+            <div class="component aws-component">
+                <h3>External APIs</h3>
+                <p>Weather & Mandi Data</p>
+                <div class="tech-tag">Rest Integration</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 40px; color: #999; font-size: 0.8em;">
+    </div>
+
+</body>
+</html>

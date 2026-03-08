@@ -24,7 +24,12 @@ Before running the code, ensure your AWS environment is ready.
     ```bash
     pip install -r requirements.txt
     ```
-4.  **Configure `.env`**: Ensure your `.env` file in the root directory has your AWS keys and service IDs (see `.env.example`).
+4.  **Configure `.env`**: Create a `.env` file from `.env.example` and add:
+    ```env
+    AWS_REGION=us-east-1
+    OPENWEATHER_API_KEY=your_key
+    SECRET_KEY=your_secure_string
+    ```
 5.  **Start the server**:
     ```bash
     uvicorn app.main:app --reload --port 8000
