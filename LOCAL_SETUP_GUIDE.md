@@ -42,15 +42,19 @@ The backend is a production-grade FastAPI application with structured logging an
     ```
 
 4.  **Configure Environment Variables**:
-    Create a `.env` file in the root directory and add your credentials (refer to `.env.example`):
+    Create a `.env` file in the root directory and add your credentials. Refer to `.env.example` for the full list of required variables:
     ```env
-    AWS_ACCESS_KEY_ID=your_key
-    AWS_SECRET_ACCESS_KEY=your_secret
     AWS_REGION=us-east-1
-    BEDROCK_KB_ID=your_kb_id
     OPENWEATHER_API_KEY=your_weather_key
     
-    # Google Auth (Get from Google Cloud Console)
+    # Optional: For AI Advisor (RAG)
+    BEDROCK_KB_ID=your_kb_id
+    
+    # Auth Security
+    SECRET_KEY=your_32_char_random_string
+    ALGORITHM=HS256
+    
+    # Google Auth (Optional, for OAuth2 login)
     GOOGLE_CLIENT_ID=your_google_client_id
     GOOGLE_CLIENT_SECRET=your_google_client_secret
     ```

@@ -30,11 +30,13 @@ This is a mobile-friendly, responsive web frontend for KhetiPulse, built with Ne
     npm install
     ```
 
-3.  **Configure Environment**:
-    Create a `.env.local` file:
-    ```env
-    NEXT_PUBLIC_API_URL=http://localhost:8000
-    ```
+### Required Environment Variables
+Create a `.env.local` file in `khetipulse-web/` with:
+
+| Variable | Description |
+| :--- | :--- |
+| `NEXT_PUBLIC_API_URL` | Base URL of your FastAPI backend (e.g. `http://localhost:8000`) |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | (Optional) Google OAuth Client ID for social login |
 
 4.  **Run Development Server**:
     ```bash

@@ -11,6 +11,8 @@ from app.routers import today, sell, chat, schemes, preferences, auth
 from app.config import settings
 from app.utils.exceptions import KhetiPulseException
 
+from app.utils.http_client import HttpClientManager
+
 # Structured Logging
 logging.basicConfig(
     level=logging.INFO,
@@ -25,6 +27,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await HttpClientManager.close_client()
 
 # Exception Handlers
 @app.exception_handler(KhetiPulseException)

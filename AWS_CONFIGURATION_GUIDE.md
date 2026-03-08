@@ -71,23 +71,25 @@ Your local AWS User (configured via `aws configure`) must have a policy attached
 
 ---
 
-### 6. Summary of Environment Variables (.env)
-After setting up the above, your `.env` should look like this:
+### 6. Summary of Environment Variables (.env / SSM)
+The backend uses `app/config.py` which retrieves production secrets from AWS SSM Secrets Manager by default, but allows local `.env` overrides.
 
-| Variable | Description |
-| :--- | :--- |
-| `AWS_REGION` | e.g., `us-east-1` |
-| `BEDROCK_KB_ID` | From Step 2 |
-| `OPENWEATHER_API_KEY` | Your key from OpenWeatherMap |
-| `AGMARKNET_API_KEY` | `579b464db66ec23bdd000001fee029797c5f45b9462e3f8d384d4730` |
-| `DYNAMODB_TABLE_USERS` | `Users` |
-| `S3_BUCKET_NAME` | Your bucket name |
+| Variable | Source | Description |
+| :--- | :--- | :--- |
+| `AWS_REGION` | .env | e.g., `us-east-1` |
+| `BEDROCK_KB_ID` | SSM / .env | Bedrock Knowledge Base ID |
+| `OPENWEATHER_API_KEY` | SSM / .env | Key from OpenWeatherMap |
+| `AGMARKNET_API_KEY` | SSM / .env | Mandi API Key |
+| `SECRET_KEY` | SSM / .env | JWT signing secret |
+| `ALGORITHM` | .env | `HS256` (default) |
+| `DYNAMODB_TABLE_USERS` | .env | `Users` (default) |
+| `S3_BUCKET_NAME` | SSM / .env | Data storage bucket |
+
+**Note on SSM Paths:** In production, secrets are expected at `/khetipulse/prod/<VARIABLE_NAME>`.
 
 ---
 
-### 7. Deployment
-Once the above are configured, run:
-```bash
-sam build
-sam deploy --guided
-```
+### 7. Deployment (Modern ECS)
+The current recommended deployment path is using **AWS ECS Fargate**. Refer to **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)** for the full CI/CD setup.
+
+*Legacy SAM (Lambda) deployment is also supported via `template.yaml` and `sam deploy`.*

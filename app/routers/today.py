@@ -4,6 +4,7 @@ from app.models.response_models import TodayResponse
 from app.services.weather_service import WeatherService
 from app.services.recommendation_engine import RecommendationEngine
 from app.dependencies import get_weather_service, get_recommendation_engine
+from app.utils.exceptions import KhetiPulseException
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ async def get_today_actions(
         )
         
         return actions
+    except KhetiPulseException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(status_code=500, detail=str(e))
