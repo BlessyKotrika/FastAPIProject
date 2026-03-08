@@ -29,10 +29,13 @@ export default function MandiPage() {
 
   useEffect(() => {
     fetchMandi();
-  }, [selectedCrop, profile.location, profile.state, profile.language]);
+  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language]);
 
   const fetchMandi = async () => {
-    if (!selectedCrop || !profile.location) {
+    const effectiveLocation = profile.location || profile.district || "";
+    const effectiveLanguage = profile.language || "hi";
+
+    if (!selectedCrop || !effectiveLocation) {
       setLoading(false);
       setData({
         best_mandi: "Data not available for the selected crop.",
@@ -49,9 +52,9 @@ export default function MandiPage() {
       setLoading(true);
       const res = await sellSmartService.getMandiData({
         crop: selectedCrop,
-        location: profile.location || "",
+        location: effectiveLocation,
         state: profile.state || "",
-        language: profile.language,
+        language: effectiveLanguage,
       });
       setData(res);
     } catch (err) {
