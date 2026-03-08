@@ -39,9 +39,11 @@ The deployment consists of:
    - `AWS_ACCESS_KEY_ID`: Your AWS access key
    - `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key
 
-### Required API Keys
+### Required API Keys & Secrets
 1. **OpenWeather API Key**: Get from [OpenWeather](https://openweathermap.org/api)
-2. **AWS Bedrock Knowledge Base ID**: Create a knowledge base in AWS Bedrock (optional)
+2. **Bedrock Knowledge Base ID**: From AWS Console after creation.
+3. **Mandi API Key**: [Data.gov.in](https://data.gov.in/register)
+4. **JWT Secret Key**: Any 32+ char secure string.
 
 ## 🚀 Quick Deployment
 

@@ -15,16 +15,22 @@ KhetiPulse is a comprehensive, multilingual platform designed to assist Indian f
 
 ---
 
-## 🌍 Multilingual Support
+## 🌍 Multilingual & AI Features
 KhetiPulse supports: **English (en), Hindi (hi), Telugu (te), Tamil (ta), and Bengali (bn)**.
-Users can set their preferred language via the onboarding wizard or the `/preferences/language` endpoint.
+
+**Core Capabilities:**
+- **AI Advisor (RAG)**: Contextual farming advice using AWS Bedrock Claude 3 Haiku and Knowledge Bases.
+- **Smart Mandi**: Real-time market prices from Agmarknet API with trend analysis.
+- **Weather Actions**: Hyper-local weather forecast (OpenWeather API) and recommended farm actions.
+- **Local & Google Auth**: Secure user accounts with JWT-based local login or Google OAuth2.
 
 ---
 
 ## 🏗️ Backend Setup (Summary)
-1. **Amazon Bedrock**: Enable Claude 3 Haiku and Titan Text Embeddings.
-2. **Knowledge Base**: Create and sync with agricultural documentation.
-3. **Local Run**: `uvicorn app.main:app --reload`.
+1. **Amazon Bedrock**: Enable Claude 3 Haiku and Titan Text Embeddings v2.
+2. **Knowledge Base**: Create and sync with agricultural documentation (optional for basic LLM mode).
+3. **Environment**: Create `.env` based on `.env.example`.
+4. **Local Run**: `uvicorn app.main:app --reload`.
 
 ## 💻 Frontend Setup (Summary)
 1. **Framework**: Next.js 14.
@@ -36,18 +42,18 @@ Users can set their preferred language via the onboarding wizard or the `/prefer
 
 ### Option 1: AWS ECS with Load Balancer (Recommended)
 **Features:**
-- Auto-scaling ECS Fargate tasks
-- Application Load Balancer for high availability
-- GitHub Actions CI/CD pipeline
-- Production-ready infrastructure
+- Auto-scaling ECS Fargate tasks with Application Load Balancer
+- Infrastructure as Code (CloudFormation)
+- GitHub Actions CI/CD for automated build/deploy
+- Secure parameter management via AWS SSM Secrets Manager
 
 **Quick Deploy:**
 ```bash
-# 1. Set up AWS infrastructure
+# 1. Provision Infrastructure (ECR, DynamoDB, VPC, ECS, ALB)
 ./setup-aws-infrastructure.sh
 
-# 2. Configure API keys in SSM Parameter Store
-# 3. Push to GitHub main branch for automatic deployment
+# 2. Configure Secrets in SSM (OpenWeather, Bedrock, etc.)
+# 3. Push to 'main' branch for GitHub Actions deployment
 ```
 
 ### Option 2: AWS Lambda (Legacy)
