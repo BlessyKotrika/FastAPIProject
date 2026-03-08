@@ -7,13 +7,15 @@ import { sellSmartService } from "@/services/api";
 import Layout from "@/components/Layout";
 import { TrendingUp, MapPin, Info, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function MandiPage() {
-  const { profile } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t, tCrop, getCropCode } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAllMarkets, setShowAllMarkets] = useState(false);
+  const router = useRouter();
 
   const cropOptions = useMemo(() => {
     const raw = profile.crops && profile.crops.length > 0 ? profile.crops : profile.crop ? [profile.crop] : [];
@@ -28,8 +30,13 @@ export default function MandiPage() {
   }, [cropOptions]);
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     fetchMandi();
-  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language]);
+  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language, _hasHydrated, auth.isAuthenticated, router]);
 
   const fetchMandi = async () => {
     const effectiveLocation = profile.location || profile.district || "";

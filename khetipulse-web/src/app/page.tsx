@@ -19,7 +19,7 @@ import {
 import { motion } from "framer-motion";
 
 export default function Dashboard() {
-  const { profile, auth } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t, tCrop } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!_hasHydrated) return;
     if (!auth.isAuthenticated) {
       router.push("/login");
       return;
@@ -37,6 +38,7 @@ export default function Dashboard() {
     }
     fetchDashboard();
   }, [
+    _hasHydrated,
     auth.isAuthenticated,
     profile.is_onboarded,
     profile.user_id,

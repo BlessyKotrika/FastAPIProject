@@ -7,6 +7,7 @@ import { chatService, ChatAskResponse } from "@/services/api";
 import Layout from "@/components/Layout";
 import { Send, Sparkles, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 type AdvisoryMode = "llm" | "schemes";
 
@@ -17,8 +18,9 @@ interface Message {
 }
 
 export default function AdvisorPage() {
-  const { profile } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t } = useTranslation();
+  const router = useRouter();
 
   const welcomeText =
      "Namaste! I can help with Crop Care, Pests, Irrigation, Fertilizer, and Yield. What do you need help with today?";
@@ -38,10 +40,15 @@ export default function AdvisorPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     // Force fresh session on page load
     setConversationId(null);
     setMessages([{ role: "bot", text: welcomeText }]);
-  }, []);
+  }, [_hasHydrated, auth.isAuthenticated, router]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });

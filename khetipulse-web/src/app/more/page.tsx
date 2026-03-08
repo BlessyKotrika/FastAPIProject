@@ -19,10 +19,20 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function MorePage() {
-  const { profile, setProfile, logout } = useAppStore();
+  const { profile, setProfile, logout, auth, _hasHydrated } = useAppStore();
   const { t, tCrop, getCropCode } = useTranslation();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+  }, [_hasHydrated, auth.isAuthenticated, router]);
   const [states, setStates] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const [cropOptions, setCropOptions] = useState<string[]>([]);
