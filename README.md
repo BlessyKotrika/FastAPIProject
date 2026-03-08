@@ -32,6 +32,19 @@ Users can set their preferred language via the onboarding wizard or the `/prefer
 
 ---
 
+## 📖 API Documentation & OpenAPI Spec
+KhetiPulse provides comprehensive API documentation:
+- **Interactive Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc Documentation**: `http://localhost:8000/redoc`
+- **OpenAPI Specification**: The latest `openapi.json` is available in the project root.
+
+To regenerate the OpenAPI spec file after code changes:
+```bash
+python3 -c 'import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))' > openapi.json
+```
+
+---
+
 ## ☁️ Deployment Options
 
 ### Option 1: AWS ECS with Load Balancer (Recommended)
