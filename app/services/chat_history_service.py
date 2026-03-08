@@ -1,12 +1,61 @@
 import json
+import sqlite3
 import uuid
+from contextlib import contextmanager
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from app.db.database import get_db
 from app.utils.exceptions import ResourceNotFoundError, ValidationException
 
 
 class ChatHistoryService:
+    def __init__(self, db_path: Optional[str] = None):
+        base_dir = Path(__file__).resolve().parent.parent
+        data_dir = base_dir / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        self.db_path = db_path or str(data_dir / "chat_history.db")
+        self._init_schema()
+
+    @contextmanager
+    def _get_conn(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    def _init_schema(self) -> None:
+        with self._get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    language TEXT,
+                    crop TEXT,
+                    location TEXT,
+                    summary_text TEXT DEFAULT '',
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS messages (
+                    id TEXT PRIMARY KEY,
+                    conversation_id TEXT NOT NULL,
+                    role TEXT NOT NULL,
+                    content_json TEXT NOT NULL,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+                )
+                """
+            )
+            conn.commit()
+
     def _new_conversation_id(self) -> str:
         return f"conv_{uuid.uuid4().hex[:12]}"
 
@@ -15,14 +64,14 @@ class ChatHistoryService:
 
     def create_conversation(
         self,
-        user_id: int,
+        user_id: str,
         language: str,
         crop: Optional[str] = None,
         location: Optional[str] = None
     ) -> Dict[str, Any]:
         conversation_id = self._new_conversation_id()
 
-        with get_db() as conn:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -37,8 +86,8 @@ class ChatHistoryService:
             row = cursor.fetchone()
             return dict(row)
 
-    def get_conversation(self, conversation_id: str, user_id: int) -> Optional[Dict[str, Any]]:
-        with get_db() as conn:
+    def get_conversation(self, conversation_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM conversations WHERE id = ? AND user_id = ?",
@@ -47,7 +96,7 @@ class ChatHistoryService:
             row = cursor.fetchone()
             return dict(row) if row else None
 
-    def require_conversation(self, conversation_id: str, user_id: int) -> Dict[str, Any]:
+    def require_conversation(self, conversation_id: str, user_id: str) -> Dict[str, Any]:
         conversation = self.get_conversation(conversation_id, user_id)
         if not conversation:
             raise ResourceNotFoundError("Conversation", conversation_id)
@@ -56,7 +105,7 @@ class ChatHistoryService:
     def upsert_conversation_metadata(
         self,
         conversation_id: str,
-        user_id: int,
+        user_id: str,
         language: Optional[str] = None,
         crop: Optional[str] = None,
         location: Optional[str] = None
@@ -82,7 +131,7 @@ class ChatHistoryService:
 
         values.extend([conversation_id, user_id])
 
-        with get_db() as conn:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 f"""
@@ -94,10 +143,10 @@ class ChatHistoryService:
             )
             conn.commit()
 
-    def update_summary(self, conversation_id: str, user_id: int, summary_text: str) -> None:
+    def update_summary(self, conversation_id: str, user_id: str, summary_text: str) -> None:
         self.require_conversation(conversation_id, user_id)
 
-        with get_db() as conn:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -112,7 +161,7 @@ class ChatHistoryService:
     def add_message(
         self,
         conversation_id: str,
-        user_id: int,
+        user_id: str,
         role: str,
         content: Dict[str, Any],
         message_id: Optional[str] = None,
@@ -126,7 +175,7 @@ class ChatHistoryService:
         msg_id = message_id or self._new_message_id()
         content_json = json.dumps(content, ensure_ascii=False)
 
-        with get_db() as conn:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -147,12 +196,12 @@ class ChatHistoryService:
     def get_recent_messages(
         self,
         conversation_id: str,
-        user_id: int,
+        user_id: str,
         limit: int = 8
     ) -> List[Dict[str, Any]]:
         self.require_conversation(conversation_id, user_id)
 
-        with get_db() as conn:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -184,8 +233,8 @@ class ChatHistoryService:
             })
         return results
 
-    def list_conversations(self, user_id: int, limit: int = 20) -> List[Dict[str, Any]]:
-        with get_db() as conn:
+    def list_conversations(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+        with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """

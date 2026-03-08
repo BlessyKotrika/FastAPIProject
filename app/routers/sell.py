@@ -34,7 +34,7 @@ async def sell_smart(request: SellSmartRequest, mandi_service: MandiService = De
             best_mandi=best_market,
             net_price=price,
             trend_7d=trend_7d,
-            forecast_band=f"₹{price-50} - ₹{price+50}",
+            forecast_band=f"INR {price-50:.0f} - INR {price+50:.0f}",
             confidence_score=calculate_confidence(data_freshness=0.95),
             all_markets=data
         )
@@ -42,3 +42,4 @@ async def sell_smart(request: SellSmartRequest, mandi_service: MandiService = De
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

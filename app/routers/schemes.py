@@ -4,6 +4,7 @@ from app.models.response_models import SchemeResponse
 from app.services.rag_service import RAGService
 from app.dependencies import get_rag_service
 from app.routers.auth import get_current_user
+from app.utils.exceptions import KhetiPulseException
 
 router = APIRouter()
 
@@ -31,8 +32,6 @@ async def get_schemes(
             advisory_mode="schemes"
         )
         
-        print("RAG RESPONSE:", response)
-        print("TYPE:", type(response))
         # Step 2: Extract data from LLM response if available, or use comprehensive defaults
         # In production, we expect the LLM to return these keys based on the context it finds
         schemes = None

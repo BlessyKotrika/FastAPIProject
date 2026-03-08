@@ -1,9 +1,9 @@
 import boto3
 import logging
 import httpx
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Optional, List, Dict, Any, Tuple
+from datetime import datetime
 from app.config import settings
-from app.utils.exceptions import ExternalServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +19,10 @@ class MandiService:
         """Fetches AGMARKNET data from Gov API."""
         if not self.api_key:
             logger.warning("AGMARKNET_API_KEY missing, returning mock data.")
-            return self._get_mock_data()
+            return []
 
-        client = self._http_client or httpx.AsyncClient()
+        client = self._http_client or httpx.AsyncClient(timeout=20.0)
+        close_client = self._http_client is None
         try:
             params = {
                 "api-key": self.api_key,
@@ -29,9 +30,8 @@ class MandiService:
                 "limit": 50,
                 "filters[commodity]": crop
             }
-            
-            # Helper to fetch with current params
-            async def fetch(current_params):
+
+            async def fetch(current_params: Dict[str, Any]) -> List[Dict[str, Any]]:
                 response = await client.get(f"{self.base_url}{self.resource_id}", params=current_params)
                 response.raise_for_status()
                 return response.json().get("records", [])
@@ -41,32 +41,83 @@ class MandiService:
                 params["filters[district]"] = location
             if state:
                 params["filters[state]"] = state
-            
-            records = await fetch(params)
-            
+
+            records = await fetch(dict(params))
+
             # Strategy 2: State only
             if not records and location and state:
                 params.pop("filters[district]", None)
-                records = await fetch(params)
-            
+                records = await fetch(dict(params))
+
             # Strategy 3: District only
             if not records and location:
                 params.pop("filters[state]", None)
                 params["filters[district]"] = location
-                records = await fetch(params)
+                records = await fetch(dict(params))
 
-            # Strategy 4: Crop only
+            # Strategy 4: Crop only (broadest)
             if not records:
                 params.pop("filters[district]", None)
                 params.pop("filters[state]", None)
-                records = await fetch(params)
-            
-            return records
+                records = await fetch(dict(params))
+
+            return self._dedupe_records(records)
         except Exception as e:
-            print(f"Error fetching mandi data from API: {e}")
+            logger.exception("Error fetching mandi data from API: %s", e)
+            return []
+        finally:
+            if close_client:
+                await client.aclose()
+
+    def _safe_price(self, value) -> float:
+        try:
+            return float(value or 0)
+        except Exception:
+            return 0.0
+
+    def _safe_date(self, value) -> datetime:
+        text = str(value or "").strip()
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(text, fmt)
+            except Exception:
+                continue
+        return datetime.min
+
+    def _dedupe_records(self, records):
+        """
+        Deduplicate mandi rows by market/district/commodity.
+        Keep the latest arrival date; if same date, keep higher modal price.
+        """
+        if not records:
             return []
 
-    def compute_trends(self, data: List[Dict[str, Any]]) -> Tuple[str, str]:
+        best_by_key = {}
+        for r in records:
+            if not isinstance(r, dict):
+                continue
+            key = (
+                str(r.get("Market", "")).strip().lower(),
+                str(r.get("District", "")).strip().lower(),
+                str(r.get("Commodity", "")).strip().lower(),
+            )
+
+            existing = best_by_key.get(key)
+            if existing is None:
+                best_by_key[key] = r
+                continue
+
+            curr_date = self._safe_date(r.get("Arrival_Date"))
+            prev_date = self._safe_date(existing.get("Arrival_Date"))
+            curr_price = self._safe_price(r.get("Modal_Price"))
+            prev_price = self._safe_price(existing.get("Modal_Price"))
+
+            if curr_date > prev_date or (curr_date == prev_date and curr_price > prev_price):
+                best_by_key[key] = r
+
+        return list(best_by_key.values())
+
+    def compute_trends(self, data):
         """Computes 7-day and 30-day trends."""
         # Simple qualitative trend for demo
         return "Stable", "Rising (+2%)"
@@ -75,27 +126,24 @@ class MandiService:
         """Finds best mandi based on price and proximity to user location."""
         if not data:
             return "No data available", 0.0
-        
+
         # 1. First, try to find an exact match for the user's district
         normalized_location = (location or "").lower()
-        district_matches = [r for r in data if r.get('District', '').lower() == normalized_location]
-        
+        district_matches = [
+            r for r in data
+            if str(r.get("District", "")).strip().lower() == normalized_location
+        ]
+
+        def price_value(row: Dict[str, Any]) -> float:
+            return self._safe_price(row.get("Modal_Price"))
+
         # 2. If we have district matches, pick the one with the best price among them
         if district_matches:
-            best = max(district_matches, key=lambda x: float(x.get('Modal_Price', 0)))
+            best = max(district_matches, key=price_value)
         else:
-            # 3. Fallback: pick the best price across all available markets (likely in the same state)
-            best = max(data, key=lambda x: float(x.get('Modal_Price', 0)))
-            
-            if district_matches:
-                best = max(district_matches, key=lambda x: float(x.get('Modal_Price', 0)))
-            else:
-                # 2. Overall best
-                best = max(data, key=lambda x: float(x.get('Modal_Price', 0)))
-                
-            market = best.get('Market', 'Unknown')
-            price = float(best.get('Modal_Price', 0))
-            return market, price
-        except (ValueError, TypeError) as e:
-            logger.error(f"Error parsing mandi price: {e}")
-            return "Data error", 0.0
+            # 3. Fallback: best price across all available markets
+            best = max(data, key=price_value)
+
+        market = str(best.get("Market", "Unknown"))
+        price = price_value(best)
+        return market, price

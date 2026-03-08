@@ -1,6 +1,8 @@
 import httpx
 import asyncio
+import logging
 import time
+from typing import Optional, Dict, Any
 from app.config import settings
 from app.utils.exceptions import ExternalServiceError
 

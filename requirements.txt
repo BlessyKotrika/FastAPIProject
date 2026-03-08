@@ -13,3 +13,4 @@ pytest-asyncio
 bcrypt
 argon2-cffi
 mangum
+logging
