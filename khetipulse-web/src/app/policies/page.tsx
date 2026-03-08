@@ -6,16 +6,23 @@ import { schemeService } from '@/services/api';
 import Layout from '@/components/Layout';
 import { BookOpen, ExternalLink, FileCheck, Landmark, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function PoliciesPage() {
-  const { profile } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t, tCrop } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     fetchSchemes();
-  }, [profile]);
+  }, [profile, _hasHydrated, auth.isAuthenticated, router]);
 
   const fetchSchemes = async () => {
     try {

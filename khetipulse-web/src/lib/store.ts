@@ -25,6 +25,8 @@ interface AuthState {
 interface AppState {
   profile: UserProfile;
   auth: AuthState;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   setProfile: (profile: Partial<UserProfile>) => void;
   setAuth: (auth: Partial<AuthState>) => void;
   resetProfile: () => void;
@@ -56,6 +58,8 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       profile: initialProfile,
       auth: initialAuth,
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
       setProfile: (newProfile) =>
         set((state) => ({
           profile: { ...state.profile, ...newProfile },
@@ -69,6 +73,9 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'khetipulse-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

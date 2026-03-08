@@ -44,6 +44,7 @@ export const translations: Record<string, any> = {
     dashboard: {
       liveForecast: "Live Forecast",
       rain: "Rain",
+      temp: "Temp",
       wind: "Wind",
       humidity: "Humidity",
       doToday: "Do Today",
@@ -154,6 +155,7 @@ export const translations: Record<string, any> = {
     dashboard: {
       liveForecast: "लाइव पूर्वानुमान",
       rain: "बारिश",
+      temp: "तापमान",
       wind: "हवा",
       humidity: "नमी",
       doToday: "आज करें",
@@ -256,6 +258,7 @@ export const translations: Record<string, any> = {
     dashboard: {
       liveForecast: "ప్రత్యక్ష సూచన",
       rain: "వర్షం",
+      temp: "ఉష్ణోగ్రత",
       wind: "గాలి",
       humidity: "తేమ",
       doToday: "ఈరోజు చేయండి",
@@ -358,6 +361,7 @@ export const translations: Record<string, any> = {
     dashboard: {
       liveForecast: "நேரடி முன்னறிவிப்பு",
       rain: "மழை",
+      temp: "வெப்பநிலை",
       wind: "காற்று",
       humidity: "ஈரப்பதம்",
       doToday: "இன்று செய்ய வேண்டியவை",
@@ -460,6 +464,7 @@ export const translations: Record<string, any> = {
     dashboard: {
       liveForecast: "লাইভ পূর্বাভাস",
       rain: "বৃষ্টি",
+      temp: "তাপমাত্রা",
       wind: "বাতাস",
       humidity: "আর্দ্রতা",
       doToday: "আজ করুন",
