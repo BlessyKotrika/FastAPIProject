@@ -281,6 +281,8 @@ Resources:
                   - bedrock:InvokeModelWithResponseStream
                   - bedrock:ListFoundationModels
                   - bedrock:GetFoundationModel
+                  - bedrock:Retrieve
+                  - bedrock:RetrieveAndGenerate
                 Resource: '*'
         - PolicyName: TranslateAccess
           PolicyDocument:
