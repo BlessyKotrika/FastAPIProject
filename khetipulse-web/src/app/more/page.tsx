@@ -19,10 +19,13 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function MorePage() {
-  const { profile, setProfile, logout } = useAppStore();
+  const { profile, setProfile, logout, auth, _hasHydrated } = useAppStore();
   const { t, tCrop, getCropCode } = useTranslation();
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
   const [states, setStates] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const [cropOptions, setCropOptions] = useState<string[]>([]);
@@ -40,6 +43,13 @@ export default function MorePage() {
   });
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      setIsReady(true);
+      router.replace("/login");
+      return;
+    }
+    setIsReady(true);
     const loadProfileLov = async () => {
       try {
         const statesData = await onboardingService.getStates();
@@ -65,7 +75,7 @@ export default function MorePage() {
       }
     };
     loadProfileLov();
-  }, [profile.state, profile.language, getCropCode]);
+  }, [profile.state, profile.language, getCropCode, _hasHydrated, auth.isAuthenticated, router]);
 
   const handleStateChange = async (state: string) => {
     setEditForm({ ...editForm, state, district: "" });
@@ -108,6 +118,14 @@ export default function MorePage() {
     { code: 'ta', name: 'தமிழ்', sub: 'Tamil' },
     { code: 'bn', name: 'বাংলা', sub: 'Bengali' },
   ];
+
+  if (!_hasHydrated || !isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <Layout>

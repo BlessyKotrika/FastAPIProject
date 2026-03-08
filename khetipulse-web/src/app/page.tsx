@@ -19,19 +19,23 @@ import {
 import { motion } from "framer-motion";
 
 export default function Dashboard() {
-  const { profile, auth } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t, tCrop } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const lastRequestKeyRef = useRef<string>("");
   const inFlightRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
+    if (!_hasHydrated) return;
     if (!auth.isAuthenticated) {
-      router.push("/login");
+      setIsReady(true);
+      router.replace("/login");
       return;
     }
+    setIsReady(true);
     if (!profile.is_onboarded) {
       return;
     }
@@ -45,6 +49,7 @@ export default function Dashboard() {
     profile.sowing_date,
     profile.language,
     router,
+    _hasHydrated,
   ]);
 
   const fetchDashboard = async () => {
@@ -84,6 +89,14 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  if (!_hasHydrated || !isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!profile.is_onboarded) {
     return <Onboarding />;

@@ -12,19 +12,29 @@ logger = logging.getLogger(__name__)
 
 class BedrockService:
     def __init__(self, bedrock_runtime_client=None, bedrock_agent_runtime_client=None):
-        self.client = bedrock_runtime_client or boto3.client(
-            service_name="bedrock-runtime",
-            region_name=settings.AWS_REGION
-        )
-        self.kb_client = bedrock_agent_runtime_client or boto3.client(
-            service_name="bedrock-agent-runtime",
-            region_name=settings.AWS_REGION
-        )
+        try:
+            self.client = bedrock_runtime_client or boto3.client(
+                service_name="bedrock-runtime",
+                region_name=settings.AWS_REGION
+            )
+            self.kb_client = bedrock_agent_runtime_client or boto3.client(
+                service_name="bedrock-agent-runtime",
+                region_name=settings.AWS_REGION
+            )
+            self.is_mock = False
+        except Exception as e:
+            logger.warning(f"Failed to initialize Bedrock clients: {e}. Falling back to mock mode.")
+            self.client = None
+            self.kb_client = None
+            self.is_mock = True
 
     # ------------------------
     # LLM Invocation
     # ------------------------
     def _invoke_raw_text(self, prompt: str, system_prompt: str = "") -> str:
+        if self.is_mock:
+            return ""
+
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": 700,
@@ -52,6 +62,22 @@ class BedrockService:
         Invokes Claude and returns parsed JSON (best effort).
         Raises on hard invoke errors. Attempts JSON repair if needed.
         """
+        if self.is_mock:
+            # Return generic mock response for local testing
+            return {
+                "message_type": "advice",
+                "answer": "Mock advice: Please ensure your AWS credentials are configured for live Bedrock insights.",
+                "confidence_score": 0.5,
+                "checklist": ["Check credentials", "Verify region", "Check model access"],
+                "do": ["Configure AWS CLI", "Add ACCESS_KEY to .env"],
+                "avoid": ["Running in production without valid keys"],
+                "prepare": ["Wait for credentials to be updated"],
+                "schemes": [],
+                "eligible_schemes": [],
+                "documents_required": [],
+                "application_links": []
+            }
+
         try:
             text_content = self._invoke_raw_text(prompt=prompt, system_prompt=system_prompt)
         except Exception as e:
@@ -166,6 +192,9 @@ Content:
         metadata_filter: Optional[Dict[str, Any]] = None,
         number_of_results: int = 6
     ) -> List[Dict[str, Any]]:
+        if self.is_mock:
+            return []
+
         if not kb_id:
             logger.warning("BEDROCK_KB_ID missing; returning empty retrieval results.")
             return []

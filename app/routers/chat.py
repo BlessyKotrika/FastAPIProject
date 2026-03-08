@@ -60,7 +60,7 @@ async def chat(
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid user context")
 
-    account_language = str(current_user.get("language") or request.language or "hi")
+    account_language = str(current_user.get("language") or request.language or "en")
 
     if request.conversation_id:
         conversation = chat_history_service.require_conversation(

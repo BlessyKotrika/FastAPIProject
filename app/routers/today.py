@@ -14,6 +14,7 @@ async def get_today_actions(
     weather_service: WeatherService = Depends(get_weather_service),
     recommendation_engine: RecommendationEngine = Depends(get_recommendation_engine)
 ):
+    print(f"DEBUG: get_today_actions called with {request}")
     try:
         # Step 1: Fetch Weather
         weather_data = await weather_service.get_forecast(request.location)
@@ -34,4 +35,6 @@ async def get_today_actions(
     except KhetiPulseException as e:
         raise e
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

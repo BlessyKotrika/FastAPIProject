@@ -13,7 +13,7 @@ class UserBase(BaseModel):
     user_id: str = Field(..., example="user_123")
     crop: str = Field(..., example="Wheat")
     location: str = Field(..., example="Barabanki")
-    language: Language = Field(default=Language.HINDI)
+    language: Language = Field(default=Language.ENGLISH)
 
 class TodayRequest(UserBase):
     sowing_date: str = Field(..., example="2024-10-15")
@@ -22,11 +22,11 @@ class SellSmartRequest(BaseModel):
     crop: str = Field(..., example="Wheat")
     location: str = Field(..., example="Barabanki")
     state: Optional[str] = Field(None, example="Uttar Pradesh")
-    language: Language = Field(default=Language.HINDI)
+    language: Language = Field(default=Language.ENGLISH)
 
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1, example="When should I harvest my wheat?")
-    language: Language = Field(default=Language.HINDI)
+    language: Language = Field(default=Language.ENGLISH)
     crop: Optional[str] = Field(None, example="Wheat")
     location: Optional[str] = Field(None, example="Barabanki")
 

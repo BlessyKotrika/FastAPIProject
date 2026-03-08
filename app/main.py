@@ -28,6 +28,15 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+@app.on_event("startup")
+async def startup_event():
+    try:
+        from app.dependencies import get_bedrock_service
+        # Pre-warm Bedrock client to catch init errors early
+        get_bedrock_service()
+    except Exception as e:
+        logger.error(f"Startup error initializing BedrockService: {e}")
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await HttpClientManager.close_client()

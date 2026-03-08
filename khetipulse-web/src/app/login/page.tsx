@@ -8,8 +8,16 @@ import { LayoutDashboard, Sparkles, ShieldCheck, Globe, User, Lock, Phone, UserP
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const { setAuth, setProfile } = useAppStore();
+  const { setAuth, setProfile, auth, _hasHydrated } = useAppStore();
   const { t } = useTranslation();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (_hasHydrated && auth.isAuthenticated) {
+      router.replace('/');
+    }
+  }, [_hasHydrated, auth.isAuthenticated, router]);
+
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +27,15 @@ export default function LoginPage() {
     full_name: '',
     mobile_number: '',
   });
-  const router = useRouter();
+
+  if (!_hasHydrated) {
+    console.log("LoginPage waiting for hydration...");
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,25 +84,29 @@ export default function LoginPage() {
     // Update store with token
     setAuth({ token: token, isAuthenticated: true });
 
-    // Fetch user profile from backend
-    const user = await authService.getMe();
-    const crops: string[] = Array.isArray(user.crops)
-      ? user.crops
-      : (user.crop ? [user.crop] : []);
-    const profileData = {
-      user_id: user.username,
-      full_name: user.full_name,
-      mobile_number: user.mobile_number || '',
-      language: user.language || 'hi',
-      state: user.state || '',
-      district: user.district || '',
-      location: user.location || user.district || '',
-      crop: user.crop || crops[0] || '',
-      crops,
-      sowing_date: user.sowing_date || '',
-      is_onboarded: user.is_onboarded || false,
-    };
-    setProfile(profileData);
+    try {
+      // Fetch user profile from backend
+      const user = await authService.getMe();
+      const crops: string[] = Array.isArray(user.crops)
+        ? user.crops
+        : (user.crop ? [user.crop] : []);
+      const profileData = {
+        user_id: user.username,
+        full_name: user.full_name,
+        mobile_number: user.mobile_number || '',
+        language: user.language || 'en',
+        state: user.state || '',
+        district: user.district || '',
+        location: user.location || user.district || '',
+        crop: user.crop || crops[0] || '',
+        crops,
+        sowing_date: user.sowing_date || '',
+        is_onboarded: user.is_onboarded || false,
+      };
+      setProfile(profileData);
+    } catch (profileErr) {
+      console.error("Failed to fetch profile after login:", profileErr);
+    }
 
     // Decide where to send user
     router.replace('/');

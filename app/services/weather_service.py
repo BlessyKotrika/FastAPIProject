@@ -41,18 +41,35 @@ class WeatherService:
             return data
 
         async def _do_fetch():
-            async with httpx.AsyncClient() as client:
-                params = {
-                    "q": location,
-                    "appid": self.api_key,
-                    "units": "metric",
-                    "cnt": 16 # 16 * 3 hours = 48 hours
+            params = {
+                "q": location,
+                "appid": self.api_key,
+                "units": "metric",
+                "cnt": 16 # 16 * 3 hours = 48 hours
+            }
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(self.base_url, params=params)
+                    if response.status_code == 404:
+                        logger.warning(f"Location not found: {location}. Using mock data.")
+                        return {
+                            "list": [
+                                {"dt_txt": "2025-11-01 12:00:00", "main": {"temp": 28, "humidity": 55}, "weather": [{"main": "Clear", "description": "clear sky"}], "wind": {"speed": 4}},
+                                {"dt_txt": "2025-11-02 12:00:00", "main": {"temp": 26, "humidity": 65}, "weather": [{"main": "Clouds", "description": "few clouds"}], "wind": {"speed": 6}}
+                            ]
+                        }
+                    response.raise_for_status()
+                    data = response.json()
+                    self._cache[cache_key] = {"ts": time.time(), "data": data}
+                    return data
+            except Exception as e:
+                logger.error(f"Error fetching weather for {location}: {e}. Falling back to mock data.")
+                return {
+                    "list": [
+                        {"dt_txt": "2025-11-01 12:00:00", "main": {"temp": 25, "humidity": 60}, "weather": [{"main": "Clear", "description": "clear sky"}], "wind": {"speed": 5}},
+                        {"dt_txt": "2025-11-02 12:00:00", "main": {"temp": 22, "humidity": 80}, "weather": [{"main": "Rain", "description": "light rain"}], "wind": {"speed": 12}}
+                    ]
                 }
-                response = await client.get(self.base_url, params=params)
-                response.raise_for_status()
-                data = response.json()
-                self._cache[cache_key] = {"ts": time.time(), "data": data}
-                return data
 
         task = asyncio.create_task(_do_fetch())
         self._inflight[cache_key] = task

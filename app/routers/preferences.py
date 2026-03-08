@@ -23,7 +23,7 @@ async def get_language(user_id: str, table = Depends(get_user_table)):
     try:
         response = table.get_item(Key={'user_id': user_id})
         if 'Item' in response:
-            return {"user_id": user_id, "language": response['Item'].get('language', 'hi')}
-        return {"user_id": user_id, "language": "hi", "message": "User not found, returning default"}
+            return {"user_id": user_id, "language": response['Item'].get('language', 'en')}
+        return {"user_id": user_id, "language": "en", "message": "User not found, returning default"}
     except Exception as e:
-        return {"user_id": user_id, "language": "hi", "error": str(e)}
+        return {"user_id": user_id, "language": "en", "error": str(e)}

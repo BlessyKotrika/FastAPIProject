@@ -24,15 +24,27 @@ from app.services.recommendation_engine import RecommendationEngine
 from app.services.chat_history_service import ChatHistoryService
 
 # Pre-instantiate services (could also be done per-request if needed)
-_bedrock_service = BedrockService()
-_rag_service = RAGService(_bedrock_service)
-_chat_history_service = ChatHistoryService()
+_bedrock_service = None
+_rag_service = None
+_chat_history_service = None
 
-async def get_bedrock_service() -> BedrockService:
+def get_bedrock_service() -> BedrockService:
+    global _bedrock_service
+    if _bedrock_service is None:
+        _bedrock_service = BedrockService()
     return _bedrock_service
 
-async def get_rag_service() -> RAGService:
+def get_rag_service(bedrock: BedrockService = Depends(get_bedrock_service)) -> RAGService:
+    global _rag_service
+    if _rag_service is None:
+        _rag_service = RAGService(bedrock)
     return _rag_service
+
+def get_chat_history_service() -> ChatHistoryService:
+    global _chat_history_service
+    if _chat_history_service is None:
+        _chat_history_service = ChatHistoryService()
+    return _chat_history_service
 
 async def get_weather_service(http_client = Depends(get_http_client)) -> WeatherService:
     return WeatherService(http_client=http_client)

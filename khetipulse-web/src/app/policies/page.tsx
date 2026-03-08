@@ -6,16 +6,26 @@ import { schemeService } from '@/services/api';
 import Layout from '@/components/Layout';
 import { BookOpen, ExternalLink, FileCheck, Landmark, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function PoliciesPage() {
-  const { profile } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t, tCrop } = useTranslation();
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      setIsReady(true);
+      router.replace("/login");
+      return;
+    }
+    setIsReady(true);
     fetchSchemes();
-  }, [profile]);
+  }, [profile.state, profile.crop, profile.language, auth.isAuthenticated, router, _hasHydrated]);
 
   const fetchSchemes = async () => {
     try {
@@ -34,6 +44,14 @@ export default function PoliciesPage() {
       setLoading(false);
     }
   };
+
+  if (!_hasHydrated || !isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <Layout>

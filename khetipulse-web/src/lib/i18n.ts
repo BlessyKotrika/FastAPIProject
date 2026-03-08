@@ -3,7 +3,7 @@ import { translations } from './translations';
 
 export const useTranslation = () => {
   const { profile } = useAppStore();
-  const lang = profile.language || 'hi';
+  const lang = profile.language || 'en';
   const active = translations[lang] || translations['en'];
   const fallback = translations['en'];
 
@@ -74,7 +74,8 @@ export const useTranslation = () => {
       const code = getCropCode(crop);
       const key = `onboarding.crops.${code}`;
       const translated = resolveKey(active, key) ?? resolveKey(fallback, key);
-      return typeof translated === 'string' ? translated : crop;
+      const text = typeof translated === 'string' ? translated : crop;
+      return text.charAt(0).toUpperCase() + text.slice(1);
     },
     getCropCode,
     lang,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 import { useTranslation } from "@/lib/i18n";
-import { Tractor, MapPin, Languages, ChevronRight, Check } from "lucide-react";
+import { Tractor, MapPin, Languages, ChevronRight, Check, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { authService } from "@/services/api";
 
@@ -34,6 +34,12 @@ export default function Onboarding() {
   });
 
   const [step, setStep] = useState(0);
+  const [cropSearch, setCropSearch] = useState("");
+
+  const filteredCrops = crops.filter(crop => {
+    const label = (tCrop(crop) || crop).toLowerCase();
+    return label.includes(cropSearch.toLowerCase());
+  });
 
   useEffect(() => {
     async function loadOnboardingData() {
@@ -216,57 +222,90 @@ export default function Onboarding() {
       {/* FARM STEP */}
 
       {step === 2 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h2 className="text-3xl font-bold mb-6">
-            {t("onboarding.mainCrop")}
-          </h2>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold mb-2">
+              {t("onboarding.mainCrop")}
+            </h2>
+            <p className="text-slate-500 text-sm">
+              {t("onboarding.mainCropSub") || "Select the crops you are currently growing."}
+            </p>
+          </div>
 
-          <div className="space-y-6">
-            <div className="rounded-2xl border bg-white p-3">
-              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">
-                {t("onboarding.selectCrop")}
-              </p>
-              <div className="max-h-56 overflow-y-auto space-y-2">
-                {crops.map((crop) => {
-                  const selected = form.crops.includes(crop);
-                  return (
-                    <label
-                      key={crop}
-                      className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer ${
-                        selected
-                          ? "border-primary-500 bg-primary-50"
-                          : "border-slate-200 bg-white"
-                      }`}
-                    >
-                      <span className="text-sm font-semibold text-slate-800">
-                        {tCrop(crop) || crop}
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-primary-600"
-                        checked={selected}
-                        onChange={(e) => {
-                          const next = e.target.checked
-                            ? [...form.crops, crop]
-                            : form.crops.filter((c) => c !== crop);
-                          setForm({ ...form, crops: next });
-                        }}
-                      />
-                    </label>
-                  );
-                })}
-              </div>
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder={t("onboarding.searchCrop") || "Search crops..."}
+                className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
+                value={cropSearch}
+                onChange={(e) => setCropSearch(e.target.value)}
+              />
             </div>
 
-            <input
-              type="date"
-              className="w-full p-4 bg-white rounded-xl border"
-              value={form.sowing_date}
-              onChange={(e) =>
-                setForm({ ...form, sowing_date: e.target.value })
-              }
-            />
+            <div className="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto p-1">
+              {filteredCrops.map((crop) => {
+                const selected = form.crops.includes(crop);
+                return (
+                  <button
+                    key={crop}
+                    onClick={() => {
+                      const next = selected
+                        ? form.crops.filter((c) => c !== crop)
+                        : [...form.crops, crop];
+                      setForm({ ...form, crops: next });
+                    }}
+                    className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 relative ${
+                      selected
+                        ? "border-primary-600 bg-primary-50 shadow-md shadow-primary-100 scale-[1.02]"
+                        : "border-slate-100 bg-white hover:border-slate-200"
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                      selected ? "bg-primary-600 text-white" : "bg-slate-50 text-slate-400"
+                    }`}>
+                      <Tractor size={24} />
+                    </div>
+                    
+                    <span className={`text-sm font-bold text-center ${
+                      selected ? "text-primary-700" : "text-slate-600"
+                    }`}>
+                      {tCrop(crop) || crop}
+                    </span>
 
+                    {selected && (
+                      <div className="absolute top-2 right-2 bg-primary-600 text-white rounded-full p-0.5">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+              
+              {filteredCrops.length === 0 && (
+                <div className="col-span-2 py-8 text-center text-slate-400 italic">
+                  No crops found matching "{cropSearch}"
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">
+                {t("onboarding.sowingDate") || "Sowing Date"}
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full p-4 bg-white rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
+                  value={form.sowing_date}
+                  onChange={(e) =>
+                    setForm({ ...form, sowing_date: e.target.value })
+                  }
+                />
+              </div>
+            </div>
           </div>
         </motion.div>
       )}

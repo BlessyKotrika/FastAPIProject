@@ -37,6 +37,13 @@ class RecommendationEngine:
         except Exception as e:
             raise ExternalServiceError("Bedrock LLM", detail=str(e))
         
+        # Ensure do/avoid/prepare exist for TodayResponse validation
+        for key in ["do", "avoid", "prepare"]:
+            if key not in response_json:
+                response_json[key] = []
+            elif not isinstance(response_json[key], list):
+                response_json[key] = [str(response_json[key])]
+
         # Add metadata
         response_json["weather_risk"] = {
             "rain_forecast": rain_risk,

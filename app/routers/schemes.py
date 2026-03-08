@@ -15,7 +15,7 @@ async def get_schemes(
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        account_language = current_user.get("language") or request.language or "hi"
+        account_language = current_user.get("language") or request.language or "en"
 
         # Keep question user-like so the RAG intent router can classify it as a scheme query.
         query = (

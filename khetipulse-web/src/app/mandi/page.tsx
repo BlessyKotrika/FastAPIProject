@@ -6,15 +6,22 @@ import { sellSmartService } from '@/services/api';
 import Layout from '@/components/Layout';
 import { TrendingUp, MapPin, Info, ArrowUpRight, RefreshCw, Search, Calculator } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
-const DEFAULT_CROPS = ["Wheat", "Rice", "Cotton", "Maize", "Soybean", "Chana", "Groundnut", "Mustard"];
+const DEFAULT_CROPS = [
+  "Rice", "Wheat", "Maize", "Barley", "Jowar", "Bajra", "Ragi", "Millets", 
+  "Pulses", "Gram", "Tur", "Moong", "Urad", "Lentil", "Groundnut", "Soybean", 
+  "Sunflower", "Mustard", "Sesame", "Cotton", "Jute", "Sugarcane", "Tea", 
+  "Coffee", "Rubber", "Coconut", "Potato", "Onion", "Tomato", "Chillies", 
+  "Turmeric"
+];
 
 const INDIAN_STATES = [
-  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
-  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh",
-  "Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab",
-  "Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh",
-  "Uttarakhand","West Bengal"
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+  "Uttarakhand", "West Bengal"
 ];
 
 const YIELD_QTL_PER_ACRE: Record<string, number> = {
@@ -28,14 +35,18 @@ const YIELD_QTL_PER_ACRE: Record<string, number> = {
   Mustard: 6,
 };
 
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const safeNumber = (v: any) => {
   const n = parseFloat(String(v ?? "").replace(/[^\d.]/g, ""));
   return Number.isFinite(n) ? n : 0;
 };
 
 export default function MandiPage() {
-  const { profile } = useAppStore();
+  const { profile, auth, _hasHydrated } = useAppStore();
   const { t } = useTranslation();
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -54,8 +65,8 @@ export default function MandiPage() {
 
   const cropOptions = useMemo(() => {
     const set = new Set(DEFAULT_CROPS);
-    if (profile.crop) set.add(profile.crop);
-    return Array.from(set);
+    if (profile.crop) set.add(capitalize(profile.crop));
+    return Array.from(set).map(c => capitalize(c));
   }, [profile.crop]);
 
   const allMarkets = useMemo(() => data?.all_markets || [], [data]);
@@ -70,13 +81,20 @@ export default function MandiPage() {
   }, [allMarkets, calcState]);
 
   useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!auth.isAuthenticated) {
+      setIsReady(true);
+      router.replace("/login");
+      return;
+    }
+    setIsReady(true);
     fetchMandi();
-  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language]);
+  }, [selectedCrop, profile.location, profile.district, profile.state, profile.language, auth.isAuthenticated, router, _hasHydrated]);
 
   const fetchMandi = async (locationOverride?: string, cropOverride?: string) => {
     const effectiveLocation = (locationOverride || selectedLocation || profile.location || profile.district || 'Barabanki').trim();
     const effectiveCrop = (cropOverride || selectedCrop || profile.crop || 'Wheat').trim();
-    const effectiveLanguage = profile.language || "hi";
+    const effectiveLanguage = profile.language || 'en';
 
     if (!effectiveCrop || !effectiveLocation) {
       setLoading(false);
@@ -139,9 +157,17 @@ export default function MandiPage() {
     return safeNumber(selectedMarket?.Modal_Price ?? selectedMarket?.price);
   }, [selectedMarket, data?.net_price]);
 
-  const yieldPerAcre = YIELD_QTL_PER_ACRE[selectedCrop] || 10;
+  const yieldPerAcre = YIELD_QTL_PER_ACRE[capitalize(selectedCrop)] || 10;
   const estimatedProductionQtl = +(areaAcres * yieldPerAcre).toFixed(2);
   const estimatedGrossValue = Math.round(estimatedProductionQtl * selectedMarketPrice);
+
+  if (!_hasHydrated || !isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <Layout>

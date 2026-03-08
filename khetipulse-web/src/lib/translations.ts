@@ -33,6 +33,7 @@ export const translations: Record<string, any> = {
       mainCropSub: "This helps us customize your advisor experience.",
       cropName: "Crop Name",
       selectCrop: "Select Crop",
+      searchCrop: "Search crops...",
       sowingDate: "Sowing Date",
       crops: {
         wheat: "Wheat",
@@ -143,6 +144,7 @@ export const translations: Record<string, any> = {
       mainCropSub: "यह हमें आपके सलाहकार अनुभव को अनुकूलित करने में मदद करता है।",
       cropName: "फसल का नाम",
       selectCrop: "फसल चुनें",
+      searchCrop: "फसल खोजें...",
       sowingDate: "बुवाई की तारीख",
       crops: {
         wheat: "गेहूं",
@@ -245,6 +247,7 @@ export const translations: Record<string, any> = {
       mainCropSub: "ఇది మీ సలహాదారు అనుభవాన్ని అనుకూలీకరించడంలో మాకు సహాయపడుతుంది.",
       cropName: "పంట పేరు",
       selectCrop: "పంటను ఎంచుకోండి",
+      searchCrop: "పంటను వెతకండి...",
       sowingDate: "విత్తిన తేదీ",
       crops: {
         wheat: "గోధుమ",
@@ -347,6 +350,7 @@ export const translations: Record<string, any> = {
       mainCropSub: "இது உங்கள் ஆலோசகர் அனுபவத்தைத் தனிப்பயனாக்க உதவுகிறது.",
       cropName: "பயிரின் பெயர்",
       selectCrop: "பயிரைத் தேர்ந்தெடுக்கவும்",
+      searchCrop: "பயிரைத் தேடுங்கள்...",
       sowingDate: "விதைத்த தேதி",
       crops: {
         wheat: "கோதுமை",
@@ -449,6 +453,7 @@ export const translations: Record<string, any> = {
       mainCropSub: "এটি আমাদের আপনার উপদেষ্টা অভিজ্ঞতা কাস্টমাইজ করতে সাহায্য করে।",
       cropName: "ফসলের নাম",
       selectCrop: "ফসল নির্বাচন করুন",
+      searchCrop: "শস্য অনুসন্ধান করুন...",
       sowingDate: "বপনের তারিখ",
       crops: {
         wheat: "গম",
