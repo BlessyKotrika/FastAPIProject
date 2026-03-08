@@ -63,22 +63,8 @@ class MandiService:
             
             return records
         except Exception as e:
-            logger.error(f"Error fetching mandi data: {e}")
-            return self._get_mock_data()
-        finally:
-            if self._http_client is None:
-                await client.aclose()
-
-    def _get_mock_data(self) -> List[Dict[str, Any]]:
-        return [
-            {
-                "Market": "Barabanki",
-                "Commodity": "Wheat",
-                "Modal_Price": "2450",
-                "District": "Barabanki",
-                "Arrival_Date": "01/11/2025"
-            }
-        ]
+            print(f"Error fetching mandi data from API: {e}")
+            return []
 
     def compute_trends(self, data: List[Dict[str, Any]]) -> Tuple[str, str]:
         """Computes 7-day and 30-day trends."""
@@ -90,9 +76,16 @@ class MandiService:
         if not data:
             return "No data available", 0.0
         
-        try:
-            # 1. District match
-            district_matches = [r for r in data if r.get('District', '').lower() == location.lower()]
+        # 1. First, try to find an exact match for the user's district
+        normalized_location = (location or "").lower()
+        district_matches = [r for r in data if r.get('District', '').lower() == normalized_location]
+        
+        # 2. If we have district matches, pick the one with the best price among them
+        if district_matches:
+            best = max(district_matches, key=lambda x: float(x.get('Modal_Price', 0)))
+        else:
+            # 3. Fallback: pick the best price across all available markets (likely in the same state)
+            best = max(data, key=lambda x: float(x.get('Modal_Price', 0)))
             
             if district_matches:
                 best = max(district_matches, key=lambda x: float(x.get('Modal_Price', 0)))

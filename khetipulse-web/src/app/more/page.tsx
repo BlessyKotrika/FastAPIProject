@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/i18n';
 import Layout from '@/components/Layout';
+import { authService } from '@/services/api';
 import { 
   User, 
   Settings, 
@@ -21,7 +22,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MorePage() {
   const { profile, setProfile, logout } = useAppStore();
-  const { t } = useTranslation();
+  const { t, tCrop, getCropCode } = useTranslation();
+  const [cropOptions, setCropOptions] = useState<string[]>([]);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -29,15 +31,42 @@ export default function MorePage() {
     mobile_number: profile.mobile_number || '',
     district: profile.district || '',
     state: profile.state || '',
-    crop: profile.crop || '',
+    crops: (profile.crops && profile.crops.length > 0)
+      ? Array.from(new Set(profile.crops.map((c) => getCropCode(c)).filter(Boolean)))
+      : (profile.crop ? [getCropCode(profile.crop)] : []),
     sowing_date: profile.sowing_date || '',
   });
 
-  const handleEditSave = () => {
-    setProfile({
+  useEffect(() => {
+    const loadCropOptions = async () => {
+      try {
+        const api = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${api}/onboarding/crops`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const normalized = Array.from(new Set(data.map((c: string) => getCropCode(c)).filter(Boolean)));
+          setCropOptions(normalized);
+        }
+      } catch (e) {
+        console.error("Failed to load crop list", e);
+      }
+    };
+    loadCropOptions();
+  }, []);
+
+  const handleEditSave = async () => {
+    const payload = {
       ...editForm,
+      crop: editForm.crops[0] || "",
+      crops: editForm.crops,
       location: editForm.district, // for backward compatibility
-    });
+    };
+    setProfile(payload);
+    try {
+      await authService.updateProfile(payload);
+    } catch (e) {
+      console.error("Failed to save profile", e);
+    }
     setShowEditModal(false);
   };
 
@@ -77,7 +106,9 @@ export default function MorePage() {
                 mobile_number: profile.mobile_number || '',
                 district: profile.district || '',
                 state: profile.state || '',
-                crop: profile.crop || '',
+                crops: (profile.crops && profile.crops.length > 0)
+                  ? Array.from(new Set(profile.crops.map((c) => getCropCode(c)).filter(Boolean)))
+                  : (profile.crop ? [getCropCode(profile.crop)] : []),
                 sowing_date: profile.sowing_date || '',
               });
               setShowEditModal(true);
@@ -116,7 +147,7 @@ export default function MorePage() {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('more.primaryCrop')}</p>
                 <p className="text-sm font-bold text-slate-700">
-                  {t(`onboarding.crops.${profile.crop}`) || profile.crop} ({t('more.sown')}: {profile.sowing_date})
+                  {tCrop(profile.crop || profile.crops?.[0]) || profile.crop} ({t('more.sown')}: {profile.sowing_date})
                 </p>
               </div>
             </div>
@@ -188,8 +219,13 @@ export default function MorePage() {
                   {languages.map((l) => (
                     <button
                       key={l.code}
-                      onClick={() => {
+                      onClick={async () => {
                         setProfile({ language: l.code });
+                        try {
+                          await authService.updateProfile({ language: l.code });
+                        } catch (e) {
+                          console.error("Failed to update language", e);
+                        }
                         setShowLangModal(false);
                       }}
                       className={`w-full p-4 rounded-2xl border-2 text-left flex justify-between items-center transition-all ${
@@ -270,16 +306,34 @@ export default function MorePage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.cropName')}</label>
-                    <select 
-                      className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 focus:outline-none focus:border-primary-300 font-semibold text-slate-800 appearance-none"
-                      value={editForm.crop}
-                      onChange={(e) => setEditForm({...editForm, crop: e.target.value})}
-                    >
-                      <option value="wheat">{t('onboarding.crops.wheat')}</option>
-                      <option value="paddy">{t('onboarding.crops.paddy')}</option>
-                      <option value="cotton">{t('onboarding.crops.cotton')}</option>
-                      <option value="maize">{t('onboarding.crops.maize')}</option>
-                    </select>
+                    <div className="max-h-56 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                      {(cropOptions.length > 0 ? cropOptions : ["Wheat", "Paddy", "Cotton", "Maize"]).map((crop) => {
+                        const selected = editForm.crops.includes(crop);
+                        return (
+                          <label
+                            key={crop}
+                            className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer ${
+                              selected ? "border-primary-500 bg-primary-50" : "border-slate-200 bg-white"
+                            }`}
+                          >
+                            <span className="text-sm font-semibold text-slate-800">
+                              {tCrop(crop) || crop}
+                            </span>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-primary-600"
+                              checked={selected}
+                              onChange={(e) => {
+                                const next = e.target.checked
+                                  ? [...editForm.crops, crop]
+                                  : editForm.crops.filter((c) => c !== crop);
+                                setEditForm({ ...editForm, crops: next });
+                              }}
+                            />
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase px-2">{t('onboarding.sowingDate')}</label>
@@ -306,3 +360,4 @@ export default function MorePage() {
     </Layout>
   );
 }
+

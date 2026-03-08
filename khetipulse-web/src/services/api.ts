@@ -64,6 +64,10 @@ export const authService = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+  updateProfile: async (data: any) => {
+    const response = await api.put('/profile', data);
+    return response.data;
+  },
 };
 
 export const todayService = {
@@ -104,7 +108,7 @@ export const schemeService = {
     land_size: number;
     category: string;
     crop: string;
-    language: string;
+    language?: string;
   }) => {
     const response = await api.post('/schemes/', data);
     return response.data;

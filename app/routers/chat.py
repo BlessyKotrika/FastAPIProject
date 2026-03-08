@@ -16,8 +16,8 @@ async def chat(
     chat_history_service: ChatHistoryService = Depends(get_chat_history_service),
     current_user: dict = Depends(get_current_user),
 ):
-    try:
-        user_id = current_user["id"]
+    user_id = current_user["id"]
+    account_language = str(current_user.get("language") or request.language or "hi")
 
         # 1) Resolve or create conversation
         if request.conversation_id:
@@ -47,7 +47,9 @@ async def chat(
         history = chat_history_service.get_recent_messages(
             conversation_id=conversation_id,
             user_id=user_id,
-            limit=8
+            language=account_language,
+            crop=request.crop,
+            location=request.location
         )
 
         # 3) Persist user message
@@ -60,36 +62,47 @@ async def chat(
         chat_history_service.add_message(
             conversation_id=conversation_id,
             user_id=user_id,
-            role="user",
-            content=user_message_payload,
-            message_id=request.client_message_id  # optional idempotency key
-        )
-
-        # 4) Generate response from RAG with history + summary
-        rag_response = rag_service.answer_question(
-            question=request.question,
-            language=str(request.language),
+            language=account_language,
             crop=request.crop,
             location=request.location,
             history=history,
             conversation_summary=conversation.get("summary_text", ""),
             advisory_mode=request.advisory_mode or "llm"
         )
+        conversation_id = conversation["id"]
 
-        # 5) Normalize response to match ChatResponse model
-        normalized = {
-            "message_type": rag_response.get("message_type", "advice"),
-            "answer": rag_response.get("answer", "Not confident."),
-            "confidence_score": rag_response.get("confidence_score", 0.5),
-            "citations": rag_response.get("citations", []),
-            "checklist": rag_response.get("checklist", []),
-            "do": rag_response.get("do", []),
-            "dont": rag_response.get("dont", []),
-            "schemes": rag_response.get("schemes", []),
-            "eligible_schemes": rag_response.get("eligible_schemes", []),
-            "documents_required": rag_response.get("documents_required", []),
-            "application_links": rag_response.get("application_links", []),
-        }
+    # 2) Fetch prior history BEFORE adding current user turn
+    history = chat_history_service.get_recent_messages(
+        conversation_id=conversation_id,
+        user_id=user_id,
+        limit=8
+    )
+
+    # 3) Persist user message
+    user_message_payload = {
+        "question": request.question,
+        "language": account_language,
+        "crop": request.crop,
+        "location": request.location
+    }
+    chat_history_service.add_message(
+        conversation_id=conversation_id,
+        user_id=user_id,
+        role="user",
+        content=user_message_payload,
+        message_id=request.client_message_id  # optional idempotency key
+    )
+
+    # 4) Generate response from RAG with history + summary
+    rag_response = rag_service.answer_question(
+        question=request.question,
+        language=account_language,
+        crop=request.crop,
+        location=request.location,
+        history=history,
+        conversation_summary=conversation.get("summary_text", ""),
+        advisory_mode=request.advisory_mode or "llm"
+    )
 
         # 6) Persist assistant message
         assistant_message_id = chat_history_service.add_message(
@@ -99,13 +112,9 @@ async def chat(
             content=normalized
         )
 
-        # 7) Return API response
-        return {
-            "conversation_id": conversation_id,
-            "message_id": assistant_message_id,
-            **normalized
-        }
-    except KhetiPulseException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # 7) Return API response
+    return {
+        "conversation_id": conversation_id,
+        "message_id": assistant_message_id,
+        **normalized
+    }

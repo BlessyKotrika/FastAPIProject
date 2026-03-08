@@ -42,6 +42,25 @@ class DynamoDBUserTable:
             print(f"Error putting item: {e}")
             return False
 
+    def update_profile(self, user_id: str, profile_data: dict):
+        """Update only the profile-related attributes for an existing user."""
+        if not profile_data:
+            return True
+        try:
+            update_expr = "SET " + ", ".join(f"#{k}=:{k}" for k in profile_data.keys())
+            expr_attr_names = {f"#{k}": k for k in profile_data.keys()}
+            expr_attr_vals = {f":{k}": v for k, v in profile_data.items()}
+            self.table.update_item(
+                Key={'user_id': user_id},
+                UpdateExpression=update_expr,
+                ExpressionAttributeNames=expr_attr_names,
+                ExpressionAttributeValues=expr_attr_vals,
+            )
+            return True
+        except ClientError as e:
+            print(f"Error updating profile: {e}")
+            return False
+
 def init_db():
     """Initialize DynamoDB table (table should be created in AWS console or via terraform)."""
     # Note: In production, use AWS CloudFormation or Terraform to manage table creation

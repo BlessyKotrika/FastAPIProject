@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PoliciesPage() {
   const { profile } = useAppStore();
-  const { t } = useTranslation();
+  const { t, tCrop } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -79,7 +79,7 @@ export default function PoliciesPage() {
                     <div className="flex-1">
                       <h4 className="font-bold text-slate-900 mb-1 leading-tight">{scheme.name}</h4>
                       <p className="text-xs text-slate-500 leading-relaxed">
-                        {scheme.description || t('policies.support', { crop: t(`onboarding.crops.${profile.crop}`) || profile.crop })}
+                        {scheme.description || t('policies.support', { crop: tCrop(profile.crop) || profile.crop })}
                       </p>
                       <div className="mt-2">
                         <span className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">{t('policies.eligible')}</span>
@@ -154,3 +154,5 @@ export default function PoliciesPage() {
     </Layout>
   );
 }
+
+

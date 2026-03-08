@@ -112,7 +112,7 @@ export const translations: Record<string, any> = {
   hi: {
     common: {
       namaste: "नमस्ते!",
-      loading: "लोड हो रहा है...",
+      loading: "Loading...",
       continue: "जारी रखें",
       startFarming: "खेती शुरू करें",
       apply: "लागू करें",
@@ -120,6 +120,14 @@ export const translations: Record<string, any> = {
       error: "त्रुटि",
       offline: "ऑफलाइन: स्थानीय डेटा का उपयोग कर रहे हैं",
       smartAgri: "स्मार्ट कृषि",
+      login: "लॉग इन",
+      register: "पंजीकरण करें",
+      username: "उपयोगकर्ता नाम",
+      password: "पासवर्ड",
+      fullName: "पूरा नाम",
+      mobile: "मोबाइल नंबर",
+      noAccount: "कोई खाता नहीं है?",
+      haveAccount: "पहले से खाता है?"
     },
     onboarding: {
       selectLang: "भाषा चुनें",

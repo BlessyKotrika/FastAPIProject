@@ -48,7 +48,7 @@ class SchemeRequest(BaseModel):
     land_size: float = Field(..., gt=0, example=2.5)
     category: str = Field(..., example="Small")
     crop: str = Field(..., example="Wheat")
-    language: Language = Field(default=Language.HINDI)
+    language: Optional[Language] = Field(default=None)
 
 class LanguagePreferenceRequest(BaseModel):
     user_id: str = Field(..., example="user_123")
@@ -63,3 +63,14 @@ class UserRegisterRequest(BaseModel):
     password: str = Field(..., min_length=6, example="secure_password")
     full_name: Optional[str] = Field(None, example="John Doe")
     mobile_number: Optional[str] = Field(None, example="9876543210")
+
+
+class UserProfileUpdateRequest(BaseModel):
+    language: Optional[Language]
+    state: Optional[str]
+    district: Optional[str]
+    location: Optional[str]
+    crop: Optional[str]
+    crops: Optional[List[str]]
+    sowing_date: Optional[str]
+    is_onboarded: Optional[bool]

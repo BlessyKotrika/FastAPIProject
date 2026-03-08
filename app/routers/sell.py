@@ -13,6 +13,16 @@ async def sell_smart(request: SellSmartRequest, mandi_service: MandiService = De
     try:
         # Step 1: Load Mandi Data
         data = await mandi_service.get_mandi_data(request.crop, request.location, request.state)
+
+        if not data:
+            return SellSmartResponse(
+                best_mandi="Data not available for the selected crop.",
+                net_price=0,
+                trend_7d="N/A",
+                forecast_band="N/A",
+                confidence_score=calculate_confidence(data_freshness=0.2),
+                all_markets=[]
+            )
         
         # Step 2: Compute Best Mandi with language support
         best_market, price = mandi_service.get_best_mandi(data, request.location, request.language)

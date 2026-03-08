@@ -3,26 +3,42 @@ from app.models.request_models import SchemeRequest
 from app.models.response_models import SchemeResponse
 from app.services.rag_service import RAGService
 from app.dependencies import get_rag_service
-from app.utils.exceptions import KhetiPulseException
+from app.routers.auth import get_current_user
 
 router = APIRouter()
 
 @router.post("/", response_model=SchemeResponse)
-async def get_schemes(request: SchemeRequest, rag_service: RAGService = Depends(get_rag_service)):
+async def get_schemes(
+    request: SchemeRequest,
+    rag_service: RAGService = Depends(get_rag_service),
+    current_user: dict = Depends(get_current_user),
+):
     try:
-        # Step 1: Broaden the query to capture more government schemes
-        query = f"Provide a detailed list of all applicable government schemes for a {request.category} farmer in {request.state} for {request.crop} with {request.land_size} hectares. Include PM-KISAN, PM-FBY, and any state-specific schemes."
+        account_language = current_user.get("language") or request.language or "hi"
+
+        # Keep question user-like so the RAG intent router can classify it as a scheme query.
+        query = (
+            f"What government schemes are available for a {request.category} farmer "
+            f"in {request.state} growing {request.crop}?"
+        )
         
         # Use RAG to find schemes based on criteria
         response = rag_service.answer_question(
             question=query,
-            language=request.language,
-            crop=request.crop
+            language=str(account_language),
+            crop=request.crop,
+            location=request.state,
+            advisory_mode="schemes"
         )
         
+        print("RAG RESPONSE:", response)
+        print("TYPE:", type(response))
         # Step 2: Extract data from LLM response if available, or use comprehensive defaults
         # In production, we expect the LLM to return these keys based on the context it finds
-        schemes = response.get("schemes")
+        schemes = None
+
+        if isinstance(response, dict):
+            schemes = response.get("schemes")
         
         # If RAG returned text instead of a structured object (fallback case)
         if not schemes:
